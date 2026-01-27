@@ -3,87 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalWork Pro | V16 Custom Cycle</title>
+    <title>CalWork Pro | V17 Master</title>
     <style>
         @font-face { font-family: 'Digital'; src: url('https://fonts.cdnfonts.com/s/14234/DS-DIGI.woff') format('woff'); }
         :root { --primary: #00d2ff; --bg: #000; --card: #121212; --success: #2ecc71; --danger: #ff4b2b; --glow: #39FF14; --selection: rgba(0, 210, 255, 0.3); }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh; }
 
-        /* شاشة البداية */
-        #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: 0.8s; }
-        #splash h1 { color: var(--primary); font-size: 2.5rem; text-shadow: 0 0 20px var(--primary); }
-
-        /* الساعة والعداد */
-        .clock-container { position: relative; width: 180px; height: 180px; margin-top: 15px; border-radius: 50%; border: 3px solid #111; box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); background: radial-gradient(circle, #0a0a0a 0%, #000 100%); }
+        /* ساعة العقارب بالأرقام المضيئة */
+        .clock-container { position: relative; width: 210px; height: 210px; margin-top: 20px; border-radius: 50%; border: 2px solid #222; background: radial-gradient(circle, #0a0a0a 0%, #000 100%); box-shadow: 0 0 20px rgba(0, 210, 255, 0.1); }
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 10px; }
-        .hour-hand { width: 5px; height: 40px; background: #fff; z-index: 10; }
-        .min-hand { width: 3px; height: 60px; background: var(--glow); z-index: 11; }
-        .sec-hand { width: 1.5px; height: 70px; background: var(--danger); z-index: 12; }
-        #work-timer { font-family: 'Digital', sans-serif; font-size: 3.5rem; color: var(--primary); margin: 10px 0; text-shadow: 0 0 15px rgba(0, 210, 255, 0.5); }
-
-        /* النوافذ (Modals) */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; justify-content: center; align-items: center; z-index: 4000; }
-        .modal-box { background: var(--card); border: 1px solid #333; border-radius: 25px; padding: 20px; width: 90%; max-height: 90%; overflow-y: auto; text-align: center; }
+        .hour-hand { width: 6px; height: 45px; background: #fff; z-index: 10; box-shadow: 0 0 5px #fff; }
+        .min-hand { width: 4px; height: 70px; background: var(--glow); z-index: 11; box-shadow: 0 0 10px var(--glow); }
+        .sec-hand { width: 2px; height: 80px; background: var(--danger); z-index: 12; }
+        .clock-num { position: absolute; width: 100%; height: 100%; text-align: center; font-weight: bold; font-size: 16px; color: var(--primary); text-shadow: 0 0 8px var(--primary); padding: 5px; box-sizing: border-box; }
         
-        /* لوحة الأرقام الكبيرة */
-        .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
-        .num-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 18px; border-radius: 15px; font-size: 1.4rem; font-weight: bold; cursor: pointer; }
-        .num-btn:active { background: var(--primary); color: #000; }
-        .pin-dot-container { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
-        .pin-dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--primary); }
-        .pin-dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        /* العداد الرقمي */
+        #work-timer { font-family: 'Digital', sans-serif; font-size: 4rem; color: var(--primary); margin: 15px 0; text-shadow: 0 0 15px rgba(0, 210, 255, 0.5); }
 
-        /* التقويم */
-        .calendar-header { margin: 10px 0; color: var(--primary); font-weight: bold; font-size: 1.1rem; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .day-btn { background: #1a1a1a; border: 1px solid #333; padding: 12px 0; border-radius: 8px; font-size: 11px; color: #fff; position: relative; }
+        /* النوافذ والتقويم */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.97); display: none; justify-content: center; align-items: center; z-index: 4000; }
+        .modal-box { background: var(--card); border: 1px solid #333; border-radius: 25px; padding: 20px; width: 90%; max-height: 90%; overflow-y: auto; text-align: center; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+        .day-btn { background: #1a1a1a; border: 1px solid #333; padding: 12px 0; border-radius: 10px; font-size: 12px; color: #fff; position: relative; cursor: pointer; }
+        .day-btn.has-data { border-color: var(--success); }
         .day-btn.has-data::after { content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: var(--success); border-radius: 50%; }
         .day-btn.selected { background: var(--selection); border-color: var(--primary); }
 
-        /* تغيير الباسورد */
-        .pass-input-group { margin: 10px 0; text-align: right; }
-        .pass-display { background: #000; padding: 10px; border-radius: 10px; border: 1px solid #333; margin-top: 5px; height: 20px; letter-spacing: 5px; font-size: 1.2rem; color: var(--primary); text-align: center; }
-        .pass-input-group.active { border: 1px solid var(--primary); }
+        /* لوحة الأرقام PIN */
+        .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
+        .num-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 18px; border-radius: 15px; font-size: 1.4rem; font-weight: bold; }
+        .num-btn:active { background: var(--primary); color: #000; }
 
-        /* التحكم */
-        .controls { display: flex; gap: 30px; margin-top: auto; padding-bottom: 30px; }
-        .circle-btn { width: 85px; height: 85px; border-radius: 50%; border: none; color: #fff; font-weight: bold; font-size: 14px; }
+        /* التوست والإشعارات */
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #1a1a1a; border: 1px solid var(--primary); padding: 12px 25px; border-radius: 50px; z-index: 5000; transition: 0.5s; }
         #toast.show { bottom: 30px; }
-        .settings-icon { position: absolute; top: 20px; left: 20px; font-size: 24px; color: #555; z-index: 2000; }
+        .settings-icon { position: absolute; top: 20px; left: 20px; font-size: 26px; color: #555; z-index: 2000; }
+
+        /* واجهة تغيير الباسورد */
+        .pass-line { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px 15px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #222; }
+        .pass-line.active { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,210,255,0.2); }
+        .stars { color: var(--primary); font-size: 1.4rem; letter-spacing: 3px; }
     </style>
 </head>
 <body onload="initApp()">
 
-    <div id="splash"><h1>CalWork Pro</h1><p style="color:#555">V16 | ENG. AYMAN</p></div>
     <div class="settings-icon" onclick="toggleMenu()">⚙️</div>
 
-    <div id="settingsMenu" class="menu" style="position:fixed; top:-100%; width:100%; background:var(--card); transition:0.5s; padding:25px; z-index:3000; border-radius: 0 0 25px 25px; border-bottom:2px solid var(--primary)">
-        <div onclick="openCalendar()" style="padding:15px; border-bottom:1px solid #222">📅 سجل التقويم (دورة 26)</div>
-        <div onclick="openPassModal()" style="padding:15px; border-bottom:1px solid #222">🔒 تغيير كلمة المرور</div>
-        <input type="email" id="targetEmail" onchange="saveEmail(this.value)" placeholder="إيميل حفظ البيانات" style="width:100%; background:#000; color:#fff; padding:10px; margin:10px 0; border-radius:8px; border:1px solid #333; text-align:center">
-        <div onclick="toggleMenu()" style="padding:15px; color:var(--danger)">✕ إغلاق</div>
-    </div>
-
-    <div class="clock-container">
-        <div id="hour" class="hand hour-hand"></div><div id="min" class="hand min-hand"></div><div id="sec" class="hand sec-hand"></div><div style="position:absolute; top:50%; left:50%; width:8px; height:8px; background:#fff; border-radius:50%; transform:translate(-50%,-50%); z-index:13"></div>
+    <div class="clock-container" id="analogClock">
+        <div id="hour" class="hand hour-hand"></div>
+        <div id="min" class="hand min-hand"></div>
+        <div id="sec" class="hand sec-hand"></div>
+        <div style="position:absolute; top:50%; left:50%; width:8px; height:8px; background:#fff; border-radius:50%; transform:translate(-50%,-50%); z-index:13"></div>
     </div>
 
     <div id="work-timer">00:00:00</div>
 
-    <div id="status-display" style="width:85%; opacity:0; transition:0.5s; background:rgba(255,255,255,0.03); border-radius:15px; padding:10px; border:1px dashed #333">
-        <div style="display:flex; justify-content:space-between"><span id="in-time" style="color:var(--glow)">--:--</span><span>وقت الحضور</span></div>
-        <div id="out-row" style="display:none; justify-content:space-between; margin-top:5px"><span id="out-time" style="color:var(--danger)">--:--</span><span>وقت الانصراف</span></div>
+    <div id="status-display" style="width:85%; opacity:0; transition:0.5s; background:rgba(255,255,255,0.03); border-radius:15px; padding:12px; border:1px dashed #444">
+        <div style="display:flex; justify-content:space-between"><span id="in-time" style="color:var(--glow); font-weight:bold">--:--</span><span>وقت الحضور</span></div>
+        <div id="out-row" style="display:none; justify-content:space-between; margin-top:8px"><span id="out-time" style="color:var(--danger); font-weight:bold">--:--</span><span>وقت الانصراف</span></div>
     </div>
 
-    <div class="controls">
-        <button id="inBtn" class="circle-btn" style="background:var(--success)" onclick="askPIN('in')">IN</button>
-        <button id="outBtn" class="circle-btn" style="background:var(--danger); opacity:0.3" onclick="askPIN('out')">OUT</button>
+    <div class="controls" style="display:flex; gap:30px; margin-top:auto; padding-bottom:40px">
+        <button id="inBtn" style="width:90px; height:90px; border-radius:50%; border:none; background:var(--success); color:#fff; font-weight:bold" onclick="askPIN('in')">IN</button>
+        <button id="outBtn" style="width:90px; height:90px; border-radius:50%; border:none; background:var(--danger); color:#fff; font-weight:bold; opacity:0.3" onclick="askPIN('out')">OUT</button>
     </div>
 
     <div id="pinOverlay" class="overlay"><div class="modal-box">
         <h3 id="pinTitle">التحقق من الهوية</h3>
-        <div class="pin-dot-container"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div>
+        <div style="display:flex; justify-content:center; gap:10px; margin:20px 0" id="dots">
+            <div class="pin-dot" style="width:15px; height:15px; border-radius:50%; border:2px solid var(--primary)"></div>
+            <div class="pin-dot" style="width:15px; height:15px; border-radius:50%; border:2px solid var(--primary)"></div>
+            <div class="pin-dot" style="width:15px; height:15px; border-radius:50%; border:2px solid var(--primary)"></div>
+            <div class="pin-dot" style="width:15px; height:15px; border-radius:50%; border:2px solid var(--primary)"></div>
+        </div>
         <div class="num-pad">
             <button class="num-btn" onclick="pressNum(1)">1</button><button class="num-btn" onclick="pressNum(2)">2</button><button class="num-btn" onclick="pressNum(3)">3</button>
             <button class="num-btn" onclick="pressNum(4)">4</button><button class="num-btn" onclick="pressNum(5)">5</button><button class="num-btn" onclick="pressNum(6)">6</button>
@@ -93,23 +85,24 @@
     </div></div>
 
     <div id="passOverlay" class="overlay"><div class="modal-box">
-        <h3 style="color:var(--primary)">تغيير كلمة المرور</h3>
-        <div class="pass-input-group" id="g1"><span>Old Pass</span><div id="oldP" class="pass-display">****</div></div>
-        <div class="pass-input-group" id="g2"><span>New Pass</span><div id="newP" class="pass-display">****</div></div>
-        <div class="pass-input-group" id="g3"><span>Confirm New</span><div id="confP" class="pass-display">****</div></div>
+        <h3 style="color:var(--primary); margin-bottom:20px">تغيير كلمة المرور</h3>
+        <div class="pass-line" id="l1"><span>Old PIN</span><div id="s1" class="stars"></div></div>
+        <div class="pass-line" id="l2"><span>New PIN</span><div id="s2" class="stars"></div></div>
+        <div class="pass-line" id="l3"><span>Confirm</span><div id="s3" class="stars"></div></div>
         <div class="num-pad">
-            <button class="num-btn" onclick="passNum(1)">1</button><button class="num-btn" onclick="passNum(2)">2</button><button class="num-btn" onclick="passNum(3)">3</button>
-            <button class="num-btn" onclick="passNum(4)">4</button><button class="num-btn" onclick="passNum(5)">5</button><button class="num-btn" onclick="passNum(6)">6</button>
-            <button class="num-btn" onclick="passNum(7)">7</button><button class="num-btn" onclick="passNum(8)">8</button><button class="num-btn" onclick="passNum(9)">9</button>
-            <button class="num-btn" onclick="closePass()">✕</button><button class="num-btn" onclick="passNum(0)">0</button><button class="num-btn" onclick="clearPass()">⌫</button>
+            <button class="num-btn" onclick="pNum(1)">1</button><button class="num-btn" onclick="pNum(2)">2</button><button class="num-btn" onclick="pNum(3)">3</button>
+            <button class="num-btn" onclick="pNum(4)">4</button><button class="num-btn" onclick="pNum(5)">5</button><button class="num-btn" onclick="pNum(6)">6</button>
+            <button class="num-btn" onclick="pNum(7)">7</button><button class="num-btn" onclick="pNum(8)">8</button><button class="num-btn" onclick="pNum(9)">9</button>
+            <button class="num-btn" onclick="closePass()">✕</button><button class="num-btn" onclick="pNum(0)">0</button><button class="num-btn" onclick="clearPass()">⌫</button>
         </div>
     </div></div>
 
     <div id="logOverlay" class="overlay"><div class="modal-box">
         <h3 style="margin:0">سجل الحضور الذكي</h3>
-        <div id="calMonth" class="calendar-header"></div>
-        <div class="calendar-grid" id="calendarGrid"></div>
-        <div id="reportArea" style="margin-top:15px"></div>
+        <div id="calHeader" style="color:var(--primary); margin:10px 0; font-weight:bold"></div>
+        <div class="calendar-grid" id="grid"></div>
+        <div id="dayInfo" style="margin-top:15px; color:#aaa; font-size:14px; min-height:40px">اضغط على يوم للتفاصيل</div>
+        <div id="rangeRes"></div>
         <button onclick="closeModals()" style="width:100%; padding:15px; background:var(--danger); border:none; color:#fff; border-radius:15px; margin-top:15px; font-weight:bold">إغلاق</button>
     </div></div>
 
@@ -117,30 +110,41 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvmKQlFFEr5vkGe3GLCmAADIJRcGVnXWimP3NSQgNZ35SPaDzr91BV-JeJPicO0FVw/exec';
-        let timer, seconds = 0, currentPIN = "", targetAction = "", appPass = localStorage.getItem('appPass') || "1234", logs = JSON.parse(localStorage.getItem('calwork_db')) || {};
-        let passStep = 1, tempOld="", tempNew="", tempConf="", selectedDays=[];
+        let timer, seconds=0, currentPIN="", targetAction="", appPass=localStorage.getItem('appPass')||"1234", logs=JSON.parse(localStorage.getItem('calwork_db'))||{};
+        let pStep=1, t1="", t2="", t3="", selDays=[];
 
         function initApp() {
+            createClockNumbers();
             setInterval(updateClock, 1000);
             document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
-            setTimeout(() => { document.getElementById('splash').style.opacity='0'; setTimeout(()=>document.getElementById('splash').style.display='none', 800); }, 2500);
+        }
+
+        function createClockNumbers() {
+            const container = document.getElementById('analogClock');
+            for(let i=1; i<=12; i++) {
+                let div = document.createElement('div');
+                div.className = 'clock-num';
+                div.innerText = i;
+                div.style.transform = `rotate(${i * 30}deg)`;
+                container.appendChild(div);
+            }
         }
 
         function updateClock() {
-            const now = new Date();
-            const h = now.getHours() % 12, m = now.getMinutes(), s = now.getSeconds();
-            document.getElementById('hour').style.transform = `translateX(-50%) rotate(${h * 30 + m * 0.5}deg)`;
-            document.getElementById('min').style.transform = `translateX(-50%) rotate(${m * 6}deg)`;
-            document.getElementById('sec').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
+            const n = new Date();
+            const h=n.getHours()%12, m=n.getMinutes(), s=n.getSeconds();
+            document.getElementById('hour').style.transform=`translateX(-50%) rotate(${h*30+m*0.5}deg)`;
+            document.getElementById('min').style.transform=`translateX(-50%) rotate(${m*6}deg)`;
+            document.getElementById('sec').style.transform=`translateX(-50%) rotate(${s*6}deg)`;
         }
 
-        function showToast(m) { document.getElementById('toast').innerText=m; document.getElementById('toast').classList.add('show'); setTimeout(()=>document.getElementById('toast').classList.remove('show'), 3000); }
+        function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
-        // نظام PIN الحضور
+        // نظام البصمة
         function askPIN(a) { targetAction=a; document.getElementById('pinOverlay').style.display='flex'; }
-        function pressNum(n) { if(currentPIN.length<4){ currentPIN+=n; updateDots(); if(currentPIN.length===4) checkPIN(); } }
-        function updateDots() { document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('active', i<currentPIN.length)); }
-        function checkPIN() { if(currentPIN===appPass){ closePIN(); targetAction==='in'?startWork():stopWork(); } else { showToast("❌ PIN خطأ"); clearPIN(); } }
+        function pressNum(n) { if(currentPIN.length<4){ currentPIN+=n; updateDots(); if(currentPIN.length==4) checkPIN(); } }
+        function updateDots() { document.querySelectorAll('.pin-dot').forEach((d,i)=>d.style.background=i<currentPIN.length? 'var(--primary)':'none'); }
+        function checkPIN() { if(currentPIN===appPass){ closePIN(); targetAction=='in'?startWork():stopWork(); } else { showToast("❌ PIN خطأ"); clearPIN(); } }
         function clearPIN() { currentPIN=""; updateDots(); }
         function closePIN() { document.getElementById('pinOverlay').style.display='none'; clearPIN(); }
 
@@ -165,75 +169,77 @@
             setTimeout(() => { document.getElementById('status-display').style.opacity='0'; document.getElementById('work-timer').innerText="00:00:00"; document.getElementById('inBtn').style.opacity='1'; document.getElementById('outBtn').style.opacity='0.3'; seconds=0; }, 10000);
         }
 
-        // نظام تغيير الباسورد المطور
-        function openPassModal() { toggleMenu(); document.getElementById('passOverlay').style.display='flex'; passStep=1; updatePassUI(); }
-        function passNum(n) {
-            if(passStep==1 && tempOld.length<4) tempOld+=n;
-            else if(passStep==2 && tempNew.length<4) tempNew+=n;
-            else if(passStep==3 && tempConf.length<4) tempConf+=n;
-            if(tempOld.length==4 && passStep==1) passStep=2;
-            if(tempNew.length==4 && passStep==2) passStep=3;
-            if(tempConf.length==4 && passStep==3) finishPass();
-            updatePassUI();
-        }
-        function updatePassUI() {
-            document.getElementById('oldP').innerText = "*".repeat(tempOld.length);
-            document.getElementById('newP').innerText = "*".repeat(tempNew.length);
-            document.getElementById('confP').innerText = "*".repeat(tempConf.length);
-            document.getElementById('g1').style.opacity = passStep==1?1:0.3;
-            document.getElementById('g2').style.opacity = passStep==2?1:0.3;
-            document.getElementById('g3').style.opacity = passStep==3?1:0.3;
-        }
-        function finishPass() {
-            if(tempOld !== appPass) { showToast("❌ القديم خطأ"); clearPass(); passStep=1; }
-            else if(tempNew !== tempConf) { showToast("❌ لا يوجد تطابق"); tempNew=""; tempConf=""; passStep=2; }
-            else { localStorage.setItem('appPass', tempNew); appPass=tempNew; showToast("✅ تم التغيير"); closePass(); }
-            updatePassUI();
-        }
-        function clearPass() { tempOld=""; tempNew=""; tempConf=""; passStep=1; updatePassUI(); }
-        function closePass() { document.getElementById('passOverlay').style.display='none'; clearPass(); }
-
-        // التقويم دورة 26
-        function openCalendar() {
-            toggleMenu(); document.getElementById('logOverlay').style.display='flex';
-            const now = new Date();
-            const monthNames = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            document.getElementById('calMonth').innerText = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-            renderCycle();
-        }
+        // التقويم المطور
+        function openCalendar() { document.getElementById('logOverlay').style.display='flex'; renderCycle(); }
         function renderCycle() {
-            const grid = document.getElementById('calendarGrid'); grid.innerHTML = "";
+            const grid = document.getElementById('grid'); grid.innerHTML = "";
             const now = new Date();
+            const months = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+            document.getElementById('calHeader').innerText = `${months[now.getMonth()]} ${now.getFullYear()}`;
             let start = new Date(now.getFullYear(), now.getMonth()-1, 26);
             let end = new Date(now.getFullYear(), now.getMonth(), 26);
             for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
                 let dayNum = d.getDate();
                 let key = `${d.getFullYear()}-${d.getMonth()+1}-${dayNum}`;
                 const btn = document.createElement('div');
-                btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selectedDays.includes(key) ? 'selected' : ''}`;
+                btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selDays.includes(key) ? 'selected' : ''}`;
                 btn.innerText = dayNum;
-                let t; btn.onmousedown = btn.ontouchstart = () => t = setTimeout(()=>selectCycle(key), 600);
-                btn.onmouseup = btn.ontouchend = () => clearTimeout(t);
+                btn.onclick = () => showDayDetails(key);
+                let hold; btn.onmousedown = btn.ontouchstart = () => hold = setTimeout(()=>selectRange(key), 600);
+                btn.onmouseup = btn.ontouchend = () => clearTimeout(hold);
                 grid.appendChild(btn);
             }
         }
-        function selectCycle(k) {
-            if(selectedDays.length>=2) selectedDays=[];
-            selectedDays.push(k); selectedDays.sort((a,b)=>new Date(a)-new Date(b));
+
+        function showDayDetails(k) {
+            const d = logs[k];
+            document.getElementById('dayInfo').innerHTML = d ? `يوم ${d.date}<br>حضور: ${d.in} | انصراف: ${d.out}<br>إجمالي: ${d.total} ساعة` : "لا توجد بيانات لهذا اليوم";
+        }
+
+        function selectRange(k) {
+            if(selDays.length>=2) selDays=[];
+            selDays.push(k); selDays.sort((a,b)=>new Date(a)-new Date(b));
             renderCycle();
-            if(selectedDays.length==2) {
+            if(selDays.length==2) {
                 let b=0, e=0;
                 for(let key in logs) {
-                    let d = new Date(key), s = new Date(selectedDays[0]), en = new Date(selectedDays[1]);
+                    let d = new Date(key), s = new Date(selDays[0]), en = new Date(selDays[1]);
                     if(d>=s && d<=en) { b+=parseFloat(logs[key].basic); e+=parseFloat(logs[key].extra); }
                 }
-                document.getElementById('reportArea').innerHTML = `<div style="background:#1a1a1a; padding:15px; border-radius:15px; border-right:4px solid var(--primary); text-align:right">مجموع الأساسي: ${b.toFixed(2)} hr<br><span style="color:var(--primary)">مجموع الإضافي: ${e.toFixed(2)} hr</span></div>`;
+                document.getElementById('rangeRes').innerHTML = `<div style="background:#1a1a1a; padding:15px; border-radius:15px; border-right:4px solid var(--primary); text-align:right; margin-top:10px">الأساسي: ${b.toFixed(2)} hr | <span style="color:var(--primary)">الإضافي: ${e.toFixed(2)} hr</span></div>`;
             }
         }
 
-        function toggleMenu() { let m=document.getElementById('settingsMenu'); m.style.top = m.style.top==='0px'?'-100%':'0px'; }
+        // نظام تغيير الباسورد
+        function openPassModal() { toggleMenu(); document.getElementById('passOverlay').style.display='flex'; pStep=1; updatePassUI(); }
+        function pNum(n) {
+            if(pStep==1 && t1.length<4) t1+=n;
+            else if(pStep==2 && t2.length<4) t2+=n;
+            else if(pStep==3 && t3.length<4) t3+=n;
+            if(t1.length==4 && pStep==1) pStep=2;
+            if(t2.length==4 && pStep==2) pStep=3;
+            if(t3.length==4 && pStep==3) finishPass();
+            updatePassUI();
+        }
+        function updatePassUI() {
+            document.getElementById('s1').innerText = "*".repeat(t1.length);
+            document.getElementById('s2').innerText = "*".repeat(t2.length);
+            document.getElementById('s3').innerText = "*".repeat(t3.length);
+            document.getElementById('l1').className = pStep==1?'pass-line active':'pass-line';
+            document.getElementById('l2').className = pStep==2?'pass-line active':'pass-line';
+            document.getElementById('l3').className = pStep==3?'pass-line active':'pass-line';
+        }
+        function finishPass() {
+            if(t1!==appPass){ showToast("❌ القديم خطأ"); clearPass(); }
+            else if(t2!==t3){ showToast("❌ لا يوجد تطابق"); t2=""; t3=""; pStep=2; }
+            else { localStorage.setItem('appPass', t2); appPass=t2; showToast("✅ تم التغيير"); closePass(); }
+        }
+        function clearPass(){ t1=""; t2=""; t3=""; pStep=1; updatePassUI(); }
+        function closePass(){ document.getElementById('passOverlay').style.display='none'; clearPass(); }
+
+        function toggleMenu() { document.getElementById('logOverlay').style.display=='flex' ? closeModals() : openCalendar(); }
         function saveEmail(v) { localStorage.setItem('targetEmail', v); showToast("✅ تم حفظ الإيميل"); }
-        function closeModals() { document.querySelectorAll('.overlay').forEach(o=>o.style.display='none'); selectedDays=[]; document.getElementById('reportArea').innerHTML=""; }
+        function closeModals() { document.querySelectorAll('.overlay').forEach(o=>o.style.display='none'); selDays=[]; document.getElementById('rangeRes').innerHTML=""; }
     </script>
 </body>
 </html>
