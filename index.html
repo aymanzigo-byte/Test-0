@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalWork Pro | V11 Cloud Sync</title>
+    <title>CalWork Pro | V11.1 Cloud Active</title>
     <style>
         :root { --primary: #00d2ff; --bg: #000; --card: #121212; --success: #2ecc71; --danger: #ff4b2b; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 0; overflow: hidden; }
@@ -21,31 +21,31 @@
         .num-btn { background: #1a1a1a; border: none; color: #fff; padding: 15px; border-radius: 12px; font-size: 1.2rem; }
         .menu { position: fixed; top: -100%; left: 0; width: 100%; background: var(--card); transition: 0.5s; padding: 25px; z-index: 1000; border-bottom: 2px solid var(--primary); border-radius: 0 0 25px 25px; box-sizing: border-box; }
         .menu.active { top: 0; }
-        .menu-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; font-size: 14px; }
+        .menu-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; font-size: 14px; text-align: right; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
         .day-btn { background: #1a1a1a; border: 1px solid #333; padding: 12px 0; border-radius: 8px; font-size: 11px; color: #fff; }
         .day-btn.has-data { border-color: var(--success); color: var(--success); }
         #work-timer { font-size: 3.5rem; text-align: center; color: var(--primary); font-family: monospace; margin: 20px 0; }
         .controls { display: flex; justify-content: center; gap: 30px; margin-top: auto; padding-bottom: 40px; }
-        .circle-btn { width: 85px; height: 85px; border-radius: 50%; border: none; color: #fff; font-weight: bold; }
-        input { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 10px; width: 100%; margin: 5px 0; text-align: center; }
+        .circle-btn { width: 85px; height: 85px; border-radius: 50%; border: none; color: #fff; font-weight: bold; cursor: pointer; }
+        input { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; width: 100%; margin: 10px 0; text-align: center; box-sizing: border-box; }
     </style>
 </head>
 <body onload="initApp()">
 
     <div id="splash">
         <h1>CalWork Pro</h1>
-        <div style="color:#555; font-size:0.8rem">V11 - Live Sync</div>
+        <div style="color:#555; font-size:0.8rem">V11.1 - Cloud Active</div>
     </div>
 
     <div class="main-content" id="app">
         <div class="header"><button class="settings-btn" onclick="toggleMenu()">⚙️</button></div>
         <div id="settingsMenu" class="menu">
-            <div class="menu-item" style="padding:15px" onclick="openCalendar()">📅 عرض السجل والتقويم</div>
-            <div class="menu-item" style="padding:15px" onclick="openPassModal()">🔒 تغيير الباسورد</div>
-            <input type="email" id="targetEmail" placeholder="إيميلك لحفظ البيانات" onchange="saveEmail(this.value)">
-            <div class="menu-item" style="padding:15px; color:var(--primary)" onclick="sendEmailReport()">📧 إرسال تقرير إيميل</div>
-            <div class="menu-item" style="padding:15px; color:var(--danger)" onclick="toggleMenu()">✕ إغلاق</div>
+            <div class="menu-item" onclick="openCalendar()">📅 عرض السجل والتقويم</div>
+            <div class="menu-item" onclick="openPassModal()">🔒 تغيير الباسورد</div>
+            <input type="email" id="targetEmail" placeholder="اكتب إيميلك لحفظ البيانات" onchange="saveEmail(this.value)">
+            <div class="menu-item" style="color:var(--primary)" onclick="sendEmailReport()">📧 إرسال تقرير إيميل</div>
+            <div class="menu-item" style="color:var(--danger)" onclick="toggleMenu()">✕ إغلاق</div>
         </div>
         <div id="work-timer">00:00:00</div>
         <div class="controls">
@@ -58,7 +58,8 @@
     <div id="logOverlay" class="overlay"><div class="modal-box" style="width:95%"><div class="calendar-grid" id="calendarGrid"></div><div id="dayDetail" style="margin-top:15px; text-align:right"></div><button onclick="closeModals()" style="width:100%; padding:12px; background:var(--danger); border:none; color:#fff; border-radius:12px; margin-top:15px">إغلاق</button></div></div>
 
     <script>
-        const SCRIPT_URL = 'حط_الرابط_اللي_نسخته_هنا'; // <--- ضع الرابط هنا بين العلامتين ''
+        // الرابط الخاص بك
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvmKQlFFEr5vkGe3GLCmAADIJRcGVnXWimP3NSQgNZ35SPaDzr91BV-JeJPicO0FVw/exec';
 
         let logs = JSON.parse(localStorage.getItem('calwork_db')) || {};
         let appPass = localStorage.getItem('appPass') || "1234";
@@ -74,7 +75,7 @@
                         location.reload(true);
                     }
                     localStorage.setItem('last_upd', latest);
-                });
+                }).catch(() => {});
             }
             setTimeout(() => { document.getElementById('splash').style.display='none'; document.getElementById('app').style.display='flex'; }, 3000);
             document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
@@ -95,6 +96,7 @@
             }
         }
         function updatePinDots() { const dots = document.querySelectorAll('.pin-dot'); dots.forEach((dot, i) => dot.classList.toggle('active', i < currentPIN.length)); }
+        function clearPIN() { currentPIN = ""; updatePinDots(); }
 
         function startWork() {
             document.getElementById('inBtn').style.opacity="0.3"; document.getElementById('outBtn').style.opacity="1";
@@ -121,9 +123,10 @@
             logs[key] = logEntry;
             localStorage.setItem('calwork_db', JSON.stringify(logs));
 
-            if (navigator.onLine && SCRIPT_URL !== 'حط_الرابط_اللي_نسخته_هنا') {
+            // إرسال البيانات فوراً إلى Google Sheet
+            if (navigator.onLine) {
                 fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(logEntry) })
-                .then(() => alert("تم التزامن مع السحاب ✅"));
+                .then(() => alert("تم التزامن مع السحاب بنجاح ✅"));
             }
 
             seconds = 0;
@@ -135,7 +138,7 @@
         function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCalendar(); }
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid'); grid.innerHTML = "";
-            const daysInMonth = 31; 
+            const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
             for(let i=1; i<=daysInMonth; i++) {
                 const key = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${i}`;
                 const btn = document.createElement('div');
@@ -148,15 +151,18 @@
         function showDay(key) {
             const d = logs[key];
             document.getElementById('dayDetail').innerHTML = d ? `
-                <p>تاريخ: ${d.date}</p><p>حضور: ${d.in}</p><p>انصراف: ${d.out}</p><p>ساعات: ${d.total}</p>
-            ` : "لا يوجد بيانات";
+                <div style="border-bottom:1px solid #333; padding:5px">التاريخ: ${d.date}</div>
+                <div style="border-bottom:1px solid #333; padding:5px">حضور: ${d.in}</div>
+                <div style="border-bottom:1px solid #333; padding:5px">انصراف: ${d.out}</div>
+                <div style="padding:5px; color:var(--primary)">إجمالي الساعات: ${d.total} hr</div>
+            ` : "لا يوجد بيانات لهذا اليوم";
         }
         function sendEmailReport() {
             const target = localStorage.getItem('targetEmail');
-            if(!target) return alert("اكتب الإيميل!");
-            let r = "Work Report\n\n";
+            if(!target) return alert("اكتب الإيميل في الإعدادات أولاً!");
+            let r = "CalWork Pro - Work Report\n\n";
             for(let k in logs) r += `${logs[k].date}: In ${logs[k].in} | Out ${logs[k].out} | Total ${logs[k].total}hr\n`;
-            window.location.href = `mailto:${target}?subject=CalWork Data&body=${encodeURIComponent(r)}`;
+            window.location.href = `mailto:${target}?subject=Work Report&body=${encodeURIComponent(r)}`;
         }
     </script>
 </body>
