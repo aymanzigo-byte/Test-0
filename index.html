@@ -3,167 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalWork Pro | V11.1 Cloud Active</title>
+    <title>CalWork Pro | Masterpiece V13</title>
     <style>
-        :root { --primary: #00d2ff; --bg: #000; --card: #121212; --success: #2ecc71; --danger: #ff4b2b; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 0; overflow: hidden; }
+        @font-face {
+            font-family: 'Digital';
+            src: url('https://fonts.cdnfonts.com/s/14234/DS-DIGI.woff') format('woff');
+        }
+        :root { --primary: #00d2ff; --bg: #000; --card: #121212; --success: #2ecc71; --danger: #ff4b2b; --glow: #39FF14; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+
+        /* شاشة الافتتاح */
         #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-        #splash h1 { color: var(--primary); font-size: 2.2rem; }
-        .main-content { display: none; flex-direction: column; height: 100vh; }
-        .header { padding: 15px 25px; display: flex; justify-content: flex-end; }
-        .settings-btn { background: none; border: none; font-size: 26px; cursor: pointer; color: #888; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-box { background: var(--card); border: 1px solid #333; border-radius: 25px; padding: 20px; width: 85%; max-height: 85%; overflow-y: auto; text-align: center; }
-        .pin-display { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
-        .pin-dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--primary); }
-        .pin-dot.active { background: var(--primary); }
-        .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .num-btn { background: #1a1a1a; border: none; color: #fff; padding: 15px; border-radius: 12px; font-size: 1.2rem; }
+        
+        /* ساعة العقارب الاحترافية */
+        .clock-container { position: relative; width: 220px; height: 220px; margin-top: 30px; border-radius: 50%; border: 4px solid #111; box-shadow: 0 0 20px rgba(0, 210, 255, 0.2), inset 0 0 15px rgba(0, 210, 255, 0.1); display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, #0a0a0a 0%, #000 100%); }
+        .clock-container::before { content: ''; position: absolute; width: 105%; height: 105%; border-radius: 50%; border: 2px solid var(--primary); opacity: 0.3; filter: blur(2px); }
+        .analog-clock { position: relative; width: 100%; height: 100%; }
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 10px; z-index: 10; }
+        .hour-hand { width: 6px; height: 50px; background: #fff; box-shadow: 0 0 10px #fff; }
+        .min-hand { width: 4px; height: 75px; background: var(--glow); box-shadow: 0 0 15px var(--glow); }
+        .sec-hand { width: 2px; height: 85px; background: var(--danger); z-index: 11; }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 12; box-shadow: 0 0 10px #fff; }
+        .number { position: absolute; font-size: 18px; font-weight: bold; color: #fff; transform: translate(-50%, -50%); }
+
+        /* عداد الأرقام المقطعة */
+        #work-timer { font-family: 'Digital', Courier, monospace; font-size: 4.5rem; color: var(--primary); margin: 25px 0; text-shadow: 0 0 20px rgba(0, 210, 255, 0.6); letter-spacing: 5px; }
+
+        /* بوكس وقت الحضور والانصراف */
+        #status-display { width: 85%; height: 80px; display: flex; flex-direction: column; justify-content: center; gap: 8px; font-size: 1.1rem; opacity: 0; transition: 0.5s; }
+        .status-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .status-label { color: #888; font-size: 0.9rem; }
+        .status-time { color: var(--glow); font-weight: bold; text-shadow: 0 0 5px var(--glow); }
+
+        /* التحكم */
+        .controls { width: 100%; display: flex; justify-content: center; gap: 40px; margin-top: auto; padding-bottom: 50px; }
+        .circle-btn { width: 90px; height: 90px; border-radius: 50%; border: none; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .settings-icon { position: absolute; top: 20px; left: 20px; font-size: 24px; color: #555; cursor: pointer; }
+
+        /* التنبيهات */
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #1a1a1a; border: 1px solid var(--primary); padding: 12px 30px; border-radius: 50px; z-index: 5000; transition: 0.5s; }
+        #toast.show { bottom: 40px; }
+        
         .menu { position: fixed; top: -100%; left: 0; width: 100%; background: var(--card); transition: 0.5s; padding: 25px; z-index: 1000; border-bottom: 2px solid var(--primary); border-radius: 0 0 25px 25px; box-sizing: border-box; }
         .menu.active { top: 0; }
-        .menu-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; font-size: 14px; text-align: right; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
-        .day-btn { background: #1a1a1a; border: 1px solid #333; padding: 12px 0; border-radius: 8px; font-size: 11px; color: #fff; }
-        .day-btn.has-data { border-color: var(--success); color: var(--success); }
-        #work-timer { font-size: 3.5rem; text-align: center; color: var(--primary); font-family: monospace; margin: 20px 0; }
-        .controls { display: flex; justify-content: center; gap: 30px; margin-top: auto; padding-bottom: 40px; }
-        .circle-btn { width: 85px; height: 85px; border-radius: 50%; border: none; color: #fff; font-weight: bold; cursor: pointer; }
-        input { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; width: 100%; margin: 10px 0; text-align: center; box-sizing: border-box; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-box { background: var(--card); border: 1px solid #333; border-radius: 25px; padding: 20px; width: 85%; text-align: center; }
     </style>
 </head>
 <body onload="initApp()">
 
-    <div id="splash">
-        <h1>CalWork Pro</h1>
-        <div style="color:#555; font-size:0.8rem">V11.1 - Cloud Active</div>
+    <div id="splash"><h1>CalWork Pro</h1><p style="color:var(--primary)">V13 - Professional Edition</p></div>
+
+    <div class="settings-icon" onclick="toggleMenu()">⚙️</div>
+
+    <div id="settingsMenu" class="menu">
+        <div onclick="openCalendar()" style="padding:15px; border-bottom:1px solid #222">📅 السجل والتقويم</div>
+        <input type="email" id="targetEmail" placeholder="إيميل حفظ البيانات" onchange="saveEmail(this.value)" style="background:#111; border:1px solid #333; color:#fff; width:100%; padding:10px; margin:10px 0; border-radius:8px">
+        <div onclick="toggleMenu()" style="padding:15px; color:var(--danger)">✕ إغلاق</div>
     </div>
 
-    <div class="main-content" id="app">
-        <div class="header"><button class="settings-btn" onclick="toggleMenu()">⚙️</button></div>
-        <div id="settingsMenu" class="menu">
-            <div class="menu-item" onclick="openCalendar()">📅 عرض السجل والتقويم</div>
-            <div class="menu-item" onclick="openPassModal()">🔒 تغيير الباسورد</div>
-            <input type="email" id="targetEmail" placeholder="اكتب إيميلك لحفظ البيانات" onchange="saveEmail(this.value)">
-            <div class="menu-item" style="color:var(--primary)" onclick="sendEmailReport()">📧 إرسال تقرير إيميل</div>
-            <div class="menu-item" style="color:var(--danger)" onclick="toggleMenu()">✕ إغلاق</div>
-        </div>
-        <div id="work-timer">00:00:00</div>
-        <div class="controls">
-            <button id="inBtn" class="circle-btn" style="background:var(--success)" onclick="askPIN('in')">CHECK IN</button>
-            <button id="outBtn" class="circle-btn" style="background:var(--danger); opacity:0.3" onclick="askPIN('out')">CHECK OUT</button>
+    <div class="clock-container">
+        <div class="analog-clock">
+            <div id="hour" class="hand hour-hand"></div>
+            <div id="min" class="hand min-hand"></div>
+            <div id="sec" class="hand sec-hand"></div>
+            <div class="center-dot"></div>
+            <div class="number" style="top:10%; left:50%">12</div>
+            <div class="number" style="top:50%; left:90%">3</div>
+            <div class="number" style="top:90%; left:50%">6</div>
+            <div class="number" style="top:50%; left:10%">9</div>
         </div>
     </div>
 
-    <div id="pinOverlay" class="overlay"><div class="modal-box"><h3>Enter PIN</h3><div class="pin-display"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div><div class="num-pad"><button class="num-btn" onclick="pressNum(1)">1</button><button class="num-btn" onclick="pressNum(2)">2</button><button class="num-btn" onclick="pressNum(3)">3</button><button class="num-btn" onclick="pressNum(4)">4</button><button class="num-btn" onclick="pressNum(5)">5</button><button class="num-btn" onclick="pressNum(6)">6</button><button class="num-btn" onclick="pressNum(7)">7</button><button class="num-btn" onclick="pressNum(8)">8</button><button class="num-btn" onclick="pressNum(9)">9</button><button class="num-btn" onclick="closeModals()">✕</button><button class="num-btn" onclick="pressNum(0)">0</button><button class="num-btn" onclick="clearPIN()">⌫</button></div></div></div>
-    <div id="logOverlay" class="overlay"><div class="modal-box" style="width:95%"><div class="calendar-grid" id="calendarGrid"></div><div id="dayDetail" style="margin-top:15px; text-align:right"></div><button onclick="closeModals()" style="width:100%; padding:12px; background:var(--danger); border:none; color:#fff; border-radius:12px; margin-top:15px">إغلاق</button></div></div>
+    <div id="work-timer">00:00:00</div>
+
+    <div id="status-display">
+        <div id="in-row" class="status-row">
+            <span class="status-time" id="in-time">--:--</span>
+            <span class="status-label">وقت الحضور</span>
+        </div>
+        <div id="out-row" class="status-row" style="display:none">
+            <span class="status-time" id="out-time">--:--</span>
+            <span class="status-label">وقت الانصراف</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="inBtn" class="circle-btn" style="background:var(--success)" onclick="startProcess('in')">CHECK IN</button>
+        <button id="outBtn" class="circle-btn" style="background:var(--danger); opacity:0.3" onclick="startProcess('out')">CHECK OUT</button>
+    </div>
+
+    <div id="toast">تم رفع البيانات بنجاح ✅</div>
 
     <script>
-        // الرابط الخاص بك
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvmKQlFFEr5vkGe3GLCmAADIJRcGVnXWimP3NSQgNZ35SPaDzr91BV-JeJPicO0FVw/exec';
-
-        let logs = JSON.parse(localStorage.getItem('calwork_db')) || {};
-        let appPass = localStorage.getItem('appPass') || "1234";
-        let currentPIN = "", targetAction = "", timer, seconds = 0;
+        let timer, seconds = 0, logs = JSON.parse(localStorage.getItem('calwork_db')) || {};
 
         function initApp() {
-            if (navigator.onLine) {
-                fetch(window.location.href + '?t=' + new Date().getTime(), { method: 'HEAD', cache: 'no-cache' })
-                .then(res => {
-                    const latest = res.headers.get('last-modified');
-                    if (localStorage.getItem('last_upd') && localStorage.getItem('last_upd') !== latest) {
-                        localStorage.setItem('last_upd', latest);
-                        location.reload(true);
-                    }
-                    localStorage.setItem('last_upd', latest);
-                }).catch(() => {});
+            updateClock();
+            setInterval(updateClock, 1000);
+            setTimeout(() => document.getElementById('splash').style.display='none', 2500);
+        }
+
+        // تحديث ساعة العقارب
+        function updateClock() {
+            const now = new Date();
+            const h = now.getHours() % 12;
+            const m = now.getMinutes();
+            const s = now.getSeconds();
+            document.getElementById('hour').style.transform = `translateX(-50%) rotate(${h * 30 + m * 0.5}deg)`;
+            document.getElementById('min').style.transform = `translateX(-50%) rotate(${m * 6}deg)`;
+            document.getElementById('sec').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
+        }
+
+        function startProcess(type) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            
+            if (type === 'in') {
+                seconds = 0;
+                document.getElementById('inBtn').style.opacity = '0.3';
+                document.getElementById('outBtn').style.opacity = '1';
+                document.getElementById('status-display').style.opacity = '1';
+                document.getElementById('in-time').innerText = timeStr;
+                document.getElementById('out-row').style.display = 'none';
+                window.entryTime = now;
+                timer = setInterval(() => {
+                    seconds++;
+                    let hh = Math.floor(seconds/3600).toString().padStart(2,'0');
+                    let mm = Math.floor((seconds%3600)/60).toString().padStart(2,'0');
+                    let ss = (seconds%60).toString().padStart(2,'0');
+                    document.getElementById('work-timer').innerText = `${hh}:${mm}:${ss}`;
+                }, 1000);
+            } else {
+                clearInterval(timer);
+                document.getElementById('out-row').style.display = 'flex';
+                document.getElementById('out-time').innerText = timeStr;
+                
+                // مزامنة السحاب
+                const logEntry = {
+                    date: now.toLocaleDateString('en-GB'),
+                    in: window.entryTime.toLocaleTimeString('en-GB'),
+                    out: now.toLocaleTimeString('en-GB'),
+                    total: (seconds/3600).toFixed(2),
+                    email: localStorage.getItem('targetEmail') || "guest"
+                };
+                fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(logEntry) });
+
+                // إخفاء البيانات بعد 10 ثواني وتصفير العداد
+                setTimeout(() => {
+                    document.getElementById('status-display').style.opacity = '0';
+                    document.getElementById('work-timer').innerText = "00:00:00";
+                    document.getElementById('inBtn').style.opacity = '1';
+                    document.getElementById('outBtn').style.opacity = '0.3';
+                }, 10000);
             }
-            setTimeout(() => { document.getElementById('splash').style.display='none'; document.getElementById('app').style.display='flex'; }, 3000);
-            document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
         }
 
         function toggleMenu() { document.getElementById('settingsMenu').classList.toggle('active'); }
-        function closeModals() { document.querySelectorAll('.overlay').forEach(el => el.style.display='none'); currentPIN = ""; updatePinDots(); }
-        function saveEmail(val) { localStorage.setItem('targetEmail', val); }
-
-        function askPIN(type) { targetAction = type; document.getElementById('pinOverlay').style.display='flex'; }
-        function pressNum(n) {
-            if(currentPIN.length < 4) {
-                currentPIN += n; updatePinDots();
-                if(currentPIN.length === 4) {
-                    if(currentPIN === appPass) { closeModals(); targetAction === 'in' ? startWork() : stopWork(); }
-                    else { alert("Wrong PIN!"); currentPIN = ""; updatePinDots(); }
-                }
-            }
-        }
-        function updatePinDots() { const dots = document.querySelectorAll('.pin-dot'); dots.forEach((dot, i) => dot.classList.toggle('active', i < currentPIN.length)); }
-        function clearPIN() { currentPIN = ""; updatePinDots(); }
-
-        function startWork() {
-            document.getElementById('inBtn').style.opacity="0.3"; document.getElementById('outBtn').style.opacity="1";
-            window.entryTime = new Date();
-            timer = setInterval(() => { seconds++; updateTimerDisplay(); }, 1000);
-        }
-        function updateTimerDisplay() {
-            let h=Math.floor(seconds/3600).toString().padStart(2,'0'), m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'), s=(seconds%60).toString().padStart(2,'0');
-            document.getElementById('work-timer').innerText = `${h}:${m}:${s}`;
-        }
-
-        function stopWork() {
-            clearInterval(timer);
-            const start = window.entryTime, end = new Date();
-            const key = `${start.getFullYear()}-${start.getMonth()+1}-${start.getDate()}`;
-            const logEntry = {
-                date: start.toLocaleDateString('en-GB'),
-                in: start.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}),
-                out: end.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}),
-                total: (seconds/3600).toFixed(2),
-                email: localStorage.getItem('targetEmail') || "guest"
-            };
-
-            logs[key] = logEntry;
-            localStorage.setItem('calwork_db', JSON.stringify(logs));
-
-            // إرسال البيانات فوراً إلى Google Sheet
-            if (navigator.onLine) {
-                fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(logEntry) })
-                .then(() => alert("تم التزامن مع السحاب بنجاح ✅"));
-            }
-
-            seconds = 0;
-            document.getElementById('work-timer').innerText = "00:00:00";
-            document.getElementById('inBtn').style.opacity="1";
-            document.getElementById('outBtn').style.opacity="0.3";
-        }
-
-        function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCalendar(); }
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid'); grid.innerHTML = "";
-            const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
-            for(let i=1; i<=daysInMonth; i++) {
-                const key = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${i}`;
-                const btn = document.createElement('div');
-                btn.className = `day-btn ${logs[key] ? 'has-data' : ''}`;
-                btn.innerText = i;
-                btn.onclick = () => showDay(key);
-                grid.appendChild(btn);
-            }
-        }
-        function showDay(key) {
-            const d = logs[key];
-            document.getElementById('dayDetail').innerHTML = d ? `
-                <div style="border-bottom:1px solid #333; padding:5px">التاريخ: ${d.date}</div>
-                <div style="border-bottom:1px solid #333; padding:5px">حضور: ${d.in}</div>
-                <div style="border-bottom:1px solid #333; padding:5px">انصراف: ${d.out}</div>
-                <div style="padding:5px; color:var(--primary)">إجمالي الساعات: ${d.total} hr</div>
-            ` : "لا يوجد بيانات لهذا اليوم";
-        }
-        function sendEmailReport() {
-            const target = localStorage.getItem('targetEmail');
-            if(!target) return alert("اكتب الإيميل في الإعدادات أولاً!");
-            let r = "CalWork Pro - Work Report\n\n";
-            for(let k in logs) r += `${logs[k].date}: In ${logs[k].in} | Out ${logs[k].out} | Total ${logs[k].total}hr\n`;
-            window.location.href = `mailto:${target}?subject=Work Report&body=${encodeURIComponent(r)}`;
-        }
+        function saveEmail(v) { localStorage.setItem('targetEmail', v); }
+        function openCalendar() { alert("جاري فتح السجل..."); }
     </script>
 </body>
 </html>
