@@ -3,57 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalWork Pro | V14 Ultimate</title>
+    <title>CalWork Pro | V15 Ultimate Master</title>
     <style>
         @font-face { font-family: 'Digital'; src: url('https://fonts.cdnfonts.com/s/14234/DS-DIGI.woff') format('woff'); }
-        :root { --primary: #00d2ff; --bg: #000; --card: #121212; --success: #2ecc71; --danger: #ff4b2b; --glow: #39FF14; }
+        :root { --primary: #00d2ff; --bg: #000; --card: #121212; --success: #2ecc71; --danger: #ff4b2b; --glow: #39FF14; --selection: rgba(0, 210, 255, 0.3); }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh; }
 
-        /* الساعة الفسفوري */
-        .clock-container { position: relative; width: 200px; height: 200px; margin-top: 20px; border-radius: 50%; border: 3px solid #111; box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); background: radial-gradient(circle, #0a0a0a 0%, #000 100%); }
-        .clock-container::before { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--primary); opacity: 0.2; filter: blur(2px); }
+        /* شاشة البداية الاحترافية */
+        #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: 0.8s; }
+        #splash h1 { color: var(--primary); font-size: 2.5rem; text-shadow: 0 0 20px var(--primary); margin: 10px 0; }
+        #splash .dev { color: #555; font-size: 0.9rem; letter-spacing: 2px; }
+
+        /* ساعة العقارب الفسفورية */
+        .clock-container { position: relative; width: 190px; height: 190px; margin-top: 15px; border-radius: 50%; border: 3px solid #111; box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); background: radial-gradient(circle, #0a0a0a 0%, #000 100%); }
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 10px; }
-        .hour-hand { width: 6px; height: 45px; background: #fff; z-index: 10; }
-        .min-hand { width: 4px; height: 65px; background: var(--glow); z-index: 11; box-shadow: 0 0 10px var(--glow); }
-        .sec-hand { width: 2px; height: 75px; background: var(--danger); z-index: 12; }
-        .center-dot { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 13; }
-        .number { position: absolute; font-size: 16px; font-weight: bold; color: #fff; transform: translate(-50%, -50%); }
+        .hour-hand { width: 5px; height: 40px; background: #fff; z-index: 10; }
+        .min-hand { width: 3px; height: 60px; background: var(--glow); z-index: 11; box-shadow: 0 0 10px var(--glow); }
+        .sec-hand { width: 1.5px; height: 70px; background: var(--danger); z-index: 12; }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 13; }
+        .number { position: absolute; font-size: 14px; color: #fff; transform: translate(-50%, -50%); }
 
         /* العداد الرقمي المقطع */
-        #work-timer { font-family: 'Digital', sans-serif; font-size: 4rem; color: var(--primary); margin: 20px 0; text-shadow: 0 0 15px rgba(0, 210, 255, 0.5); letter-spacing: 3px; }
+        #work-timer { font-family: 'Digital', sans-serif; font-size: 3.8rem; color: var(--primary); margin: 15px 0; text-shadow: 0 0 15px rgba(0, 210, 255, 0.5); }
 
-        /* بوكس الحضور/الانصراف */
-        #status-display { width: 85%; height: 70px; display: flex; flex-direction: column; justify-content: center; opacity: 0; transition: 0.5s; background: rgba(255,255,255,0.03); border-radius: 15px; padding: 10px; border: 1px dashed #333; }
-        .status-row { display: flex; justify-content: space-between; padding: 5px 10px; }
-        .status-time { color: var(--glow); font-weight: bold; }
+        /* سجل التقويم والمودال */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; justify-content: center; align-items: center; z-index: 4000; }
+        .modal-box { background: var(--card); border: 1px solid #333; border-radius: 25px; padding: 20px; width: 90%; max-height: 85%; overflow-y: auto; text-align: center; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
+        .day-btn { background: #1a1a1a; border: 1px solid #333; padding: 12px 0; border-radius: 8px; font-size: 11px; color: #fff; transition: 0.3s; position: relative; }
+        .day-btn.has-data::after { content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: var(--success); border-radius: 50%; }
+        .day-btn.selected { background: var(--selection); border-color: var(--primary); color: var(--primary); }
 
-        /* الأزرار */
-        .controls { display: flex; gap: 30px; margin-top: auto; padding-bottom: 40px; }
-        .circle-btn { width: 85px; height: 85px; border-radius: 50%; border: none; color: #fff; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
+        /* الإشعارات (Toast) */
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #1a1a1a; border: 1px solid var(--primary); padding: 12px 25px; border-radius: 50px; z-index: 5000; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 10px; }
+        #toast.show { bottom: 30px; }
+
+        /* الأزرار والتحكم */
+        .controls { display: flex; gap: 30px; margin-top: auto; padding-bottom: 30px; }
+        .circle-btn { width: 80px; height: 80px; border-radius: 50%; border: none; color: #fff; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
         .settings-icon { position: absolute; top: 20px; left: 20px; font-size: 24px; color: #555; cursor: pointer; z-index: 2000; }
-
-        /* القائمة والنوافذ */
+        
+        #status-display { width: 85%; opacity: 0; transition: 0.5s; background: rgba(255,255,255,0.03); border-radius: 15px; padding: 8px; border: 1px dashed #333; }
+        .status-row { display: flex; justify-content: space-between; padding: 3px 10px; }
+        
         .menu { position: fixed; top: -100%; left: 0; width: 100%; background: var(--card); transition: 0.5s; padding: 25px; z-index: 3000; border-bottom: 2px solid var(--primary); border-radius: 0 0 25px 25px; }
         .menu.active { top: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 4000; }
-        .modal-box { background: var(--card); border: 1px solid #333; border-radius: 25px; padding: 20px; width: 85%; text-align: center; }
-        
-        /* PIN Pad */
-        .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .num-btn { background: #1a1a1a; border: none; color: #fff; padding: 15px; border-radius: 12px; font-size: 1.2rem; }
-        .pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--primary); display: inline-block; margin: 0 5px; }
-        .pin-dot.active { background: var(--primary); }
+        .report-card { background: #1a1a1a; padding: 15px; border-radius: 15px; margin-top: 15px; border-right: 4px solid var(--primary); text-align: right; }
     </style>
 </head>
 <body onload="initApp()">
 
+    <div id="splash">
+        <div class="dev">BUILD V15</div>
+        <h1>CalWork Pro</h1>
+        <div class="dev">DEVELOPED BY ENG. AYMAN</div>
+    </div>
+
     <div class="settings-icon" onclick="toggleMenu()">⚙️</div>
 
     <div id="settingsMenu" class="menu">
-        <div onclick="openCalendar()" style="padding:15px; border-bottom:1px solid #222">📅 سجل التقويم</div>
+        <div onclick="openCalendar()" style="padding:15px; border-bottom:1px solid #222">📅 سجل التقويم المطور</div>
         <div onclick="changePass()" style="padding:15px; border-bottom:1px solid #222">🔒 تغيير كلمة المرور</div>
-        <input type="email" id="targetEmail" placeholder="إيميل حفظ البيانات" onchange="saveEmail(this.value)" style="background:#111; border:1px solid #333; color:#fff; width:100%; padding:10px; margin:10px 0; border-radius:8px">
-        <div onclick="toggleMenu()" style="padding:15px; color:var(--danger)">✕ إغلاق</div>
+        <input type="email" id="targetEmail" placeholder="إيميل حفظ البيانات" onchange="saveEmail(this.value)" style="background:#111; border:1px solid #333; color:#fff; width:100%; padding:10px; margin:10px 0; border-radius:8px; text-align:center">
+        <div onclick="toggleMenu()" style="padding:15px; color:var(--danger)">✕ إغلاق القائمة</div>
     </div>
 
     <div class="clock-container">
@@ -70,23 +82,17 @@
     <div id="work-timer">00:00:00</div>
 
     <div id="status-display">
-        <div class="status-row">
-            <span class="status-time" id="in-time">--:--</span>
-            <span>وقت الحضور</span>
-        </div>
-        <div id="out-row" class="status-row" style="display:none">
-            <span class="status-time" id="out-time">--:--</span>
-            <span>وقت الانصراف</span>
-        </div>
+        <div class="status-row"><span id="in-time" style="color:var(--glow)">--:--</span><span>وقت الحضور</span></div>
+        <div id="out-row" class="status-row" style="display:none"><span id="out-time" style="color:var(--danger)">--:--</span><span>وقت الانصراف</span></div>
     </div>
 
     <div class="controls">
-        <button id="inBtn" class="circle-btn" style="background:var(--success)" onclick="askPIN('in')">CHECK IN</button>
-        <button id="outBtn" class="circle-btn" style="background:var(--danger); opacity:0.3" onclick="askPIN('out')">CHECK OUT</button>
+        <button id="inBtn" class="circle-btn" style="background:var(--success)" onclick="askPIN('in')">IN</button>
+        <button id="outBtn" class="circle-btn" style="background:var(--danger); opacity:0.3" onclick="askPIN('out')">OUT</button>
     </div>
 
     <div id="pinOverlay" class="overlay"><div class="modal-box">
-        <h3>ادخل رمز PIN</h3>
+        <h3>التحقق من الهوية</h3>
         <div id="pinDots"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div>
         <div class="num-pad">
             <button class="num-btn" onclick="pressNum(1)">1</button><button class="num-btn" onclick="pressNum(2)">2</button><button class="num-btn" onclick="pressNum(3)">3</button>
@@ -96,15 +102,32 @@
         </div>
     </div></div>
 
+    <div id="logOverlay" class="overlay"><div class="modal-box">
+        <h4 style="color:var(--primary)">سجل الحضور الذكي</h4>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div id="reportArea"></div>
+        <button onclick="closeModals()" style="width:100%; padding:12px; background:var(--danger); border:none; color:#fff; border-radius:12px; margin-top:15px">إغلاق</button>
+    </div></div>
+
+    <div id="toast"><span id="t-icon">✅</span> <span id="t-msg">تم بنجاح</span></div>
+
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvmKQlFFEr5vkGe3GLCmAADIJRcGVnXWimP3NSQgNZ35SPaDzr91BV-JeJPicO0FVw/exec';
-        let timer, seconds = 0, currentPIN = "", targetAction = "";
+        let timer, seconds = 0, currentPIN = "", targetAction = "", selectedDays = [];
         let appPass = localStorage.getItem('appPass') || "1234";
         let logs = JSON.parse(localStorage.getItem('calwork_db')) || {};
 
         function initApp() {
             setInterval(updateClock, 1000);
             document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
+            setTimeout(() => { document.getElementById('splash').style.opacity = '0'; setTimeout(()=>document.getElementById('splash').style.display='none', 800); }, 2500);
+        }
+
+        function showToast(msg, icon="✅") {
+            document.getElementById('t-msg').innerText = msg;
+            document.getElementById('t-icon').innerText = icon;
+            document.getElementById('toast').classList.add('show');
+            setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
         }
 
         function updateClock() {
@@ -115,47 +138,23 @@
             document.getElementById('sec').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
         }
 
-        function askPIN(action) { targetAction = action; document.getElementById('pinOverlay').style.display = 'flex'; }
-        
-        function pressNum(n) {
-            if (currentPIN.length < 4) {
-                currentPIN += n;
-                updatePinDots();
-                if (currentPIN.length === 4) {
-                    if (currentPIN === appPass) {
-                        closePIN();
-                        targetAction === 'in' ? startWork() : stopWork();
-                    } else {
-                        alert("رمز PIN خطأ!");
-                        clearPIN();
-                    }
-                }
-            }
-        }
-
-        function updatePinDots() {
-            const dots = document.querySelectorAll('.pin-dot');
-            dots.forEach((dot, i) => dot.classList.toggle('active', i < currentPIN.length));
-        }
-
-        function clearPIN() { currentPIN = ""; updatePinDots(); }
+        function askPIN(a) { targetAction = a; document.getElementById('pinOverlay').style.display = 'flex'; }
+        function pressNum(n) { if(currentPIN.length < 4) { currentPIN += n; updateDots(); if(currentPIN.length===4) checkPIN(); } }
+        function updateDots() { const dots = document.querySelectorAll('.pin-dot'); dots.forEach((d, i) => d.classList.toggle('active', i < currentPIN.length)); }
+        function checkPIN() { if(currentPIN === appPass) { closePIN(); targetAction === 'in' ? startWork() : stopWork(); } else { showToast("PIN خاطئ", "❌"); clearPIN(); } }
+        function clearPIN() { currentPIN = ""; updateDots(); }
         function closePIN() { document.getElementById('pinOverlay').style.display = 'none'; clearPIN(); }
 
         function startWork() {
-            const now = new Date();
-            window.entryTime = now;
-            document.getElementById('in-time').innerText = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+            window.entryTime = new Date();
+            document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
             document.getElementById('status-display').style.opacity = '1';
-            document.getElementById('inBtn').style.opacity = '0.3';
-            document.getElementById('outBtn').style.opacity = '1';
-            document.getElementById('out-row').style.display = 'none';
-            timer = setInterval(() => {
-                seconds++;
-                let hh = Math.floor(seconds/3600).toString().padStart(2,'0');
-                let mm = Math.floor((seconds%3600)/60).toString().padStart(2,'0');
-                let ss = (seconds%60).toString().padStart(2,'0');
-                document.getElementById('work-timer').innerText = `${hh}:${mm}:${ss}`;
-            }, 1000);
+            document.getElementById('inBtn').style.opacity = '0.3'; document.getElementById('outBtn').style.opacity = '1';
+            timer = setInterval(() => { seconds++; updateTimerUI(); }, 1000);
+        }
+        function updateTimerUI() {
+            let h=Math.floor(seconds/3600).toString().padStart(2,'0'), m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'), s=(seconds%60).toString().padStart(2,'0');
+            document.getElementById('work-timer').innerText = `${h}:${m}:${s}`;
         }
 
         function stopWork() {
@@ -164,32 +163,59 @@
             document.getElementById('out-time').innerText = now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
             document.getElementById('out-row').style.display = 'flex';
             
-            const logEntry = {
-                date: now.toLocaleDateString('en-GB'),
-                in: window.entryTime.toLocaleTimeString('en-GB'),
-                out: now.toLocaleTimeString('en-GB'),
-                total: (seconds/3600).toFixed(2),
-                email: localStorage.getItem('targetEmail') || "guest"
-            };
-            
-            if (navigator.onLine) fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(logEntry) });
+            let total = (seconds/3600).toFixed(2);
+            let basic = total > 8 ? 8 : total;
+            let extra = total > 8 ? (total - 8).toFixed(2) : "0.00";
 
-            setTimeout(() => {
-                document.getElementById('status-display').style.opacity = '0';
-                document.getElementById('work-timer').innerText = "00:00:00";
-                document.getElementById('inBtn').style.opacity = '1';
-                document.getElementById('outBtn').style.opacity = '0.3';
-                seconds = 0;
-            }, 10000);
+            const entry = { date: now.toLocaleDateString('en-GB'), in: window.entryTime.toLocaleTimeString('en-GB'), out: now.toLocaleTimeString('en-GB'), total: total, basic: basic, extra: extra };
+            logs[`${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`] = entry;
+            localStorage.setItem('calwork_db', JSON.stringify(logs));
+
+            if(navigator.onLine) fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({...entry, email: localStorage.getItem('targetEmail')}) });
+            showToast("تم رفع البيانات بنجاح");
+
+            setTimeout(() => { document.getElementById('status-display').style.opacity = '0'; document.getElementById('work-timer').innerText = "00:00:00"; document.getElementById('inBtn').style.opacity = '1'; document.getElementById('outBtn').style.opacity = '0.3'; seconds = 0; }, 10000);
+        }
+
+        function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCalendar(); }
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid'); grid.innerHTML = "";
+            const days = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+            for(let i=1; i<=days; i++) {
+                const key = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${i}`;
+                const btn = document.createElement('div');
+                btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selectedDays.includes(i) ? 'selected' : ''}`;
+                btn.innerText = i;
+                let t; btn.onmousedown = btn.ontouchstart = () => t = setTimeout(() => handleSelect(i), 600);
+                btn.onmouseup = btn.ontouchend = () => clearTimeout(t);
+                grid.appendChild(btn);
+            }
+        }
+
+        function handleSelect(d) {
+            if(selectedDays.length >= 2) selectedDays = [];
+            selectedDays.push(d); selectedDays.sort((a,b)=>a-b);
+            renderCalendar();
+            if(selectedDays.length === 2) {
+                let b=0, e=0;
+                for(let i=selectedDays[0]; i<=selectedDays[1]; i++) {
+                    const k = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${i}`;
+                    if(logs[k]) { b += parseFloat(logs[k].basic||0); e += parseFloat(logs[k].extra||0); }
+                }
+                document.getElementById('reportArea').innerHTML = `<div class="report-card"><b>مجموع الأساسي:</b> ${b.toFixed(2)} hr<br><b style="color:var(--primary)">مجموع الإضافي:</b> ${e.toFixed(2)} hr</div>`;
+            }
+        }
+
+        function changePass() {
+            let p = prompt("ادخل PIN الجديد (4 أرقام):");
+            if(p && p.length===4) { localStorage.setItem('appPass', p); appPass = p; showToast("تم التغيير بنجاح"); }
+            else showToast("خطأ في الإدخال", "❌");
+            toggleMenu();
         }
 
         function toggleMenu() { document.getElementById('settingsMenu').classList.toggle('active'); }
-        function saveEmail(v) { localStorage.setItem('targetEmail', v); }
-        function changePass() {
-            let p = prompt("ادخل PIN الجديد (4 أرقام):");
-            if (p && p.length === 4) { localStorage.setItem('appPass', p); appPass = p; alert("تم الحفظ!"); }
-        }
-        function openCalendar() { toggleMenu(); alert("السجل محفوظ سحابياً وفي المتصفح"); }
+        function saveEmail(v) { localStorage.setItem('targetEmail', v); showToast("تم حفظ الإيميل"); }
+        function closeModals() { document.querySelectorAll('.overlay').forEach(o => o.style.display='none'); selectedDays=[]; document.getElementById('reportArea').innerHTML=""; }
     </script>
 </body>
 </html>
