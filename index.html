@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -129,216 +129,131 @@
     <div id="toast">✅ تم بنجاح</div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvmKQlFFEr5vkGe3GLCmAADIJRcGVnXWimP3NSQgNZ35SPaDzr91BV-JeJPicO0FVw/exec';
-        let timer, seconds=0, currentPIN="", targetAction="", appPass=localStorage.getItem('appPass')||"1234", logs=JSON.parse(localStorage.getItem('calwork_db'))||{};
-        let selDays=[];
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvmKQlFFEr5vkGe3GLCmAADIJRcGVnXWimP3NSQgNZ35SPaDzr91BV-JeJPicO0FVw/exec';
+    let timer, seconds=0, currentPIN="", targetAction="", appPass=localStorage.getItem('appPass')||"1234", logs=JSON.parse(localStorage.getItem('calwork_db'))||{};
+    let pStep=1, t1="", t2="", t3="", selDays=[];
 
-        function initApp() {
-            createClockNumbers();
-            setInterval(updateClock, 1000);
-            document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
-            setTimeout(() => { document.getElementById('splash').style.display='none'; }, 2500);
-        }
-
-        function createClockNumbers() {
-            const container = document.getElementById('analogClock');
-            for(let i=1; i<=12; i++) {
-                let div = document.createElement('div');
-                div.className = 'clock-num';
-                div.innerText = i;
-                div.style.transform = `rotate(${i * 30}deg)`;
-                container.appendChild(div);
-            }
-        }
-
-        function updateClock() {
-            const n = new Date();
-            const h=n.getHours()%12, m=n.getMinutes(), s=n.getSeconds();
-            document.getElementById('hour').style.transform=`translateX(-50%) rotate(${h*30+m*0.5}deg)`;
-            document.getElementById('min').style.transform=`translateX(-50%) rotate(${m*6}deg)`;
-            document.getElementById('sec').style.transform=`translateX(-50%) rotate(${s*6}deg)`;
-        }
-
-        function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-
-        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
-
-        function askPIN(a) { targetAction=a; document.getElementById('pinOverlay').style.display='flex'; }
-        function pressNum(n) { if(currentPIN.length<4){ currentPIN+=n; updateDots(); if(currentPIN.length==4) checkPIN(); } }
-        function updateDots() { document.querySelectorAll('.p-dot').forEach((d,i)=>d.style.background=i<currentPIN.length? 'var(--primary)':'none'); }
-        function checkPIN() { if(currentPIN===appPass){ closeModals(); targetAction=='in'?startWork():stopWork(); } else { showToast("❌ PIN خطأ"); currentPIN=""; updateDots(); } }
-        function clearPIN() { currentPIN=""; updateDots(); }
-
-        function startWork() {
-            window.entryTime = new Date();
-            document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            document.getElementById('status-display').style.opacity='1';
-            document.getElementById('inBtn').style.opacity='0.3'; document.getElementById('outBtn').style.opacity='1';
-            timer = setInterval(() => { seconds++; updateTimerUI(); }, 1000);
-        }
-
-        function updateTimerUI() {
-            let h=Math.floor(seconds/3600).toString().padStart(2,'0'), m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'), s=(seconds%60).toString().padStart(2,'0');
-            document.getElementById('work-timer').innerText=`${h}:${m}:${s}`;
-        }
-
-        function stopWork() {
-            clearInterval(timer); const now = new Date();
-            document.getElementById('out-time').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            document.getElementById('out-row').style.display='flex';
-            let t=(seconds/3600).toFixed(2), b=t>8?8:t, e=t>8?(t-8).toFixed(2):"0.00";
-            const entry = { date: now.toLocaleDateString('en-GB'), in: window.entryTime.toLocaleTimeString('en-GB'), out: now.toLocaleTimeString('en-GB'), total: t, basic: b, extra: e };
-            logs[`${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`] = entry;
-            localStorage.setItem('calwork_db', JSON.stringify(logs));
-            if(navigator.onLine) fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:JSON.stringify({...entry, email:localStorage.getItem('targetEmail')})});
-            showToast("✅ تم الرفع");
-            setTimeout(() => { document.getElementById('status-display').style.opacity='0'; document.getElementById('work-timer').innerText="00:00:00"; document.getElementById('inBtn').style.opacity='1'; document.getElementById('outBtn').style.opacity='0.3'; seconds=0; }, 10000);
-        }
-
-        function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCycle(); }
-        function renderCycle() {
-            const grid = document.getElementById('grid'); grid.innerHTML = "";
-            const now = new Date();
-            const months = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            document.getElementById('calHeader').innerText = `${months[now.getMonth()]} ${now.getFullYear()}`;
-            let start = new Date(now.getFullYear(), now.getMonth()-1, 26);
-            let end = new Date(now.getFullYear(), now.getMonth(), 26);
-            for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
-                let key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-                const btn = document.createElement('div');
-                btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selDays.includes(key) ? 'selected' : ''}`;
-                btn.innerText = d.getDate();
-                btn.onclick = () => showDay(key);
-                let hold; btn.onmousedown = btn.ontouchstart = () => hold = setTimeout(()=>selectR(key), 600);
-                btn.onmouseup = btn.ontouchend = () => clearTimeout(hold);
-                grid.appendChild(btn);
-            }
-        }
-        function showDay(k) { const d=logs[k]; document.getElementById('dayInfo').innerHTML = d ? `حضور: ${d.in} | انصراف: ${d.out}` : "لا يوجد بيانات"; }
-        function selectR(k) {
-            if(selDays.length>=2) selDays=[]; selDays.push(k); selDays.sort((a,b)=>new Date(a)-new Date(b));
-            renderCycle();
-            if(selDays.length==2) {
-                let b=0, e=0;
-                for(let key in logs) { if(new Date(key)>=new Date(selDays[0]) && new Date(key)<=new Date(selDays[1])) { b+=parseFloat(logs[key].basic); e+=parseFloat(logs[key].extra); } }
-                document.getElementById('rangeRes').innerHTML = `الأساسي: ${b.toFixed(2)} | الإضافي: ${e.toFixed(2)}`;
-            }
-        }
-
-        // المتغيرات اللازمة لتخزين الأرقام مؤقتاً
-let pStep=1, t1="", t2="", t3="";
-
-function openPassModal() { 
-    toggleMenu(); 
-    document.getElementById('passOverlay').style.display='flex'; 
-    pStep=1; 
-    clearPass(); 
-}
-
-function pNum(n) {
-    if(pStep==1 && t1.length<4) t1+=n;
-    else if(pStep==2 && t2.length<4) t2+=n;
-    else if(pStep==3 && t3.length<4) t3+=n;
-    
-    // الانتقال التلقائي بين الخانات بمجرد اكتمال 4 أرقام
-    if(t1.length==4 && pStep==1) pStep=2;
-    if(t2.length==4 && pStep==2) pStep=3;
-    if(t3.length==4 && pStep==3) finishPass();
-    updatePassUI();
-}
-
-function updatePassUI() {
-    document.getElementById('s1').innerText = "*".repeat(t1.length);
-    document.getElementById('s2').innerText = "*".repeat(t2.length);
-    document.getElementById('s3').innerText = "*".repeat(t3.length);
-    // تظليل الخانة الحالية باللون اللبني عشان تعرف إنت بتكتب فين
-    document.getElementById('l1').className = pStep==1?'pass-line active':'pass-line';
-    document.getElementById('l2').className = pStep==2?'pass-line active':'pass-line';
-    document.getElementById('l3').className = pStep==3?'pass-line active':'pass-line';
-}
-
-function finishPass() {
-    if(t1 !== appPass) { 
-        showToast("❌ القديم خطأ"); 
-        clearPass(); 
+    function initApp() {
+        createClockNumbers();
+        setInterval(updateClock, 1000);
+        document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
+        // ده السطر المسؤول عن إخفاء شاشة البداية بعد ثانيتين ونصف
+        setTimeout(() => { document.getElementById('splash').style.display='none'; }, 2500);
     }
-    else if(t2 !== t3) { 
-        showToast("❌ لا يوجد تطابق"); 
-        t2=""; t3=""; pStep=2; 
+
+    function createClockNumbers() {
+        const container = document.getElementById('analogClock');
+        for(let i=1; i<=12; i++) {
+            let div = document.createElement('div');
+            div.className = 'clock-num';
+            div.innerText = i;
+            div.style.transform = `rotate(${i * 30}deg)`;
+            container.appendChild(div);
+        }
     }
-    else { 
-        localStorage.setItem('appPass', t2); 
-        appPass=t2; 
-        showToast("✅ تم التغيير بنجاح"); 
-        closePass(); 
+
+    function updateClock() {
+        const n = new Date();
+        const h=n.getHours()%12, m=n.getMinutes(), s=n.getSeconds();
+        document.getElementById('hour').style.transform=`translateX(-50%) rotate(${h*30+m*0.5}deg)`;
+        document.getElementById('min').style.transform=`translateX(-50%) rotate(${m*6}deg)`;
+        document.getElementById('sec').style.transform=`translateX(-50%) rotate(${s*6}deg)`;
     }
-    updatePassUI();
-}
 
-function clearPass() { t1=""; t2=""; t3=""; pStep=1; updatePassUI(); }
-function closePass() { document.getElementById('passOverlay').style.display='none'; }// المتغيرات اللازمة لتخزين الأرقام مؤقتاً
-let pStep=1, t1="", t2="", t3="";
+    function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
-function openPassModal() { 
-    toggleMenu(); 
-    document.getElementById('passOverlay').style.display='flex'; 
-    pStep=1; 
-    clearPass(); 
-}
+    function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
 
-function pNum(n) {
-    if(pStep==1 && t1.length<4) t1+=n;
-    else if(pStep==2 && t2.length<4) t2+=n;
-    else if(pStep==3 && t3.length<4) t3+=n;
-    
-    // الانتقال التلقائي بين الخانات بمجرد اكتمال 4 أرقام
-    if(t1.length==4 && pStep==1) pStep=2;
-    if(t2.length==4 && pStep==2) pStep=3;
-    if(t3.length==4 && pStep==3) finishPass();
-    updatePassUI();
-}
+    function askPIN(a) { targetAction=a; document.getElementById('pinOverlay').style.display='flex'; }
+    function pressNum(n) { if(currentPIN.length<4){ currentPIN+=n; updateDots(); if(currentPIN.length==4) checkPIN(); } }
+    function updateDots() { document.querySelectorAll('.p-dot').forEach((d,i)=>d.style.background=i<currentPIN.length? 'var(--primary)':'none'); }
+    function checkPIN() { if(currentPIN===appPass){ closeModals(); targetAction=='in'?startWork():stopWork(); } else { showToast("❌ PIN خطأ"); currentPIN=""; updateDots(); } }
 
-function updatePassUI() {
-    document.getElementById('s1').innerText = "*".repeat(t1.length);
-    document.getElementById('s2').innerText = "*".repeat(t2.length);
-    document.getElementById('s3').innerText = "*".repeat(t3.length);
-    // تظليل الخانة الحالية باللون اللبني عشان تعرف إنت بتكتب فين
-    document.getElementById('l1').className = pStep==1?'pass-line active':'pass-line';
-    document.getElementById('l2').className = pStep==2?'pass-line active':'pass-line';
-    document.getElementById('l3').className = pStep==3?'pass-line active':'pass-line';
-}
-
-function finishPass() {
-    if(t1 !== appPass) { 
-        showToast("❌ القديم خطأ"); 
-        clearPass(); 
+    function startWork() {
+        window.entryTime = new Date();
+        document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('status-display').style.opacity='1';
+        document.getElementById('inBtn').style.opacity='0.3'; document.getElementById('outBtn').style.opacity='1';
+        timer = setInterval(() => { seconds++; let h=Math.floor(seconds/3600).toString().padStart(2,'0'), m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'), s=(seconds%60).toString().padStart(2,'0'); document.getElementById('work-timer').innerText=`${h}:${m}:${s}`; }, 1000);
     }
-    else if(t2 !== t3) { 
-        showToast("❌ لا يوجد تطابق"); 
-        t2=""; t3=""; pStep=2; 
-    }
-    else { 
-        localStorage.setItem('appPass', t2); 
-        appPass=t2; 
-        showToast("✅ تم التغيير بنجاح"); 
-        closePass(); 
-    }
-    updatePassUI();
-}
 
-function clearPass() { t1=""; t2=""; t3=""; pStep=1; updatePassUI(); }
-function closePass() { document.getElementById('passOverlay').style.display='none'; }
-        function saveEmail(v) { localStorage.setItem('targetEmail', v); showToast("✅ تم الحفظ"); }
-        function closeModals() { 
-    document.querySelectorAll('.overlay').forEach(o => {
-        o.style.display = 'none';
-    }); 
-    currentPIN = ""; 
-    selDays = []; 
-    // دي عشان نصفر بيانات الباسورد لو قفلنا النافذة فجأة
-    if(typeof clearPass === "function") clearPass(); 
-}
-    </script>
+    function stopWork() {
+        clearInterval(timer); const now = new Date();
+        document.getElementById('out-time').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('out-row').style.display='flex';
+        let t=(seconds/3600).toFixed(2), b=t>8?8:t, e=t>8?(t-8).toFixed(2):"0.00";
+        const entry = { date: now.toLocaleDateString('en-GB'), in: window.entryTime.toLocaleTimeString('en-GB'), out: now.toLocaleTimeString('en-GB'), total: t, basic: b, extra: e };
+        logs[`${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`] = entry;
+        localStorage.setItem('calwork_db', JSON.stringify(logs));
+        if(navigator.onLine) fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:JSON.stringify({...entry, email:localStorage.getItem('targetEmail')})});
+        showToast("✅ تم الرفع");
+        setTimeout(() => { document.getElementById('status-display').style.opacity='0'; document.getElementById('work-timer').innerText="00:00:00"; document.getElementById('inBtn').style.opacity='1'; document.getElementById('outBtn').style.opacity='0.3'; seconds=0; }, 10000);
+    }
+
+    // وظائف تغيير الباسورد الاحترافية
+    function openPassModal() { toggleMenu(); document.getElementById('passOverlay').style.display='flex'; pStep=1; clearPass(); }
+    function pNum(n) {
+        if(pStep==1 && t1.length<4) t1+=n;
+        else if(pStep==2 && t2.length<4) t2+=n;
+        else if(pStep==3 && t3.length<4) t3+=n;
+        if(t1.length==4 && pStep==1) pStep=2;
+        if(t2.length==4 && pStep==2) pStep=3;
+        if(t3.length==4 && pStep==3) finishPass();
+        updatePassUI();
+    }
+    function updatePassUI() {
+        document.getElementById('s1').innerText = "*".repeat(t1.length);
+        document.getElementById('s2').innerText = "*".repeat(t2.length);
+        document.getElementById('s3').innerText = "*".repeat(t3.length);
+        document.getElementById('l1').className = pStep==1?'pass-line active':'pass-line';
+        document.getElementById('l2').className = pStep==2?'pass-line active':'pass-line';
+        document.getElementById('l3').className = pStep==3?'pass-line active':'pass-line';
+    }
+    function finishPass() {
+        if(t1 !== appPass) { showToast("❌ القديم خطأ"); clearPass(); }
+        else if(t2 !== t3) { showToast("❌ لا يوجد تطابق"); t2=""; t3=""; pStep=2; }
+        else { localStorage.setItem('appPass', t2); appPass=t2; showToast("✅ تم التغيير"); closePass(); }
+        updatePassUI();
+    }
+    function clearPass() { t1=""; t2=""; t3=""; pStep=1; updatePassUI(); }
+    function closePass() { document.getElementById('passOverlay').style.display='none'; }
+
+    function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCycle(); }
+    function renderCycle() {
+        const grid = document.getElementById('grid'); grid.innerHTML = "";
+        const now = new Date();
+        const months = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+        document.getElementById('calHeader').innerText = `${months[now.getMonth()]} ${now.getFullYear()}`;
+        let start = new Date(now.getFullYear(), now.getMonth()-1, 26);
+        let end = new Date(now.getFullYear(), now.getMonth(), 26);
+        for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+            let key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+            const btn = document.createElement('div');
+            btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selDays.includes(key) ? 'selected' : ''}`;
+            btn.innerText = d.getDate();
+            btn.onclick = () => { const d=logs[key]; document.getElementById('dayInfo').innerHTML = d ? `حضور: ${d.in} | انصراف: ${d.out}` : "لا يوجد بيانات"; };
+            let hold; btn.onmousedown = btn.ontouchstart = () => hold = setTimeout(()=>{
+                if(selDays.length>=2) selDays=[]; selDays.push(key); selDays.sort((a,b)=>new Date(a)-new Date(b));
+                renderCycle();
+                if(selDays.length==2) {
+                    let b=0, e=0;
+                    for(let k in logs) { if(new Date(k)>=new Date(selDays[0]) && new Date(k)<=new Date(selDays[1])) { b+=parseFloat(logs[k].basic); e+=parseFloat(logs[k].extra); } }
+                    document.getElementById('rangeRes').innerHTML = `الأساسي: ${b.toFixed(2)} | الإضافي: ${e.toFixed(2)}`;
+                }
+            }, 600);
+            btn.onmouseup = btn.ontouchend = () => clearTimeout(hold);
+            grid.appendChild(btn);
+        }
+    }
+
+    function saveEmail(v) { localStorage.setItem('targetEmail', v); showToast("✅ تم الحفظ"); }
+    function closeModals() { 
+        document.querySelectorAll('.overlay').forEach(o=>o.style.display='none'); 
+        currentPIN=""; selDays=[]; 
+        if(typeof clearPass === "function") clearPass();
+    }
+</script>
 </body>
 </html>
+
 
