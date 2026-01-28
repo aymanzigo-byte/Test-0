@@ -221,39 +221,39 @@
     function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCycle(); }
     function renderCycle() {
     const grid = document.getElementById('grid'); grid.innerHTML = "";
-    const now = new Date();
-    // مفتاح اليوم الحالي للتمييز
-    const todayKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+    const n = new Date();
+    // مفتاح اليوم الحالي - تأكد من استخدام علامة الـ Backtick (حرف الذال)
+    const todayKey = `${n.getFullYear()}-${n.getMonth()+1}-${n.getDate()}`;
     
     const months = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-    document.getElementById('calHeader').innerText = `${months[now.getMonth()]} ${now.getFullYear()}`;
+    document.getElementById('calHeader').innerText = `${months[n.getMonth()]} ${n.getFullYear()}`;
     
-    let start = new Date(now.getFullYear(), now.getMonth()-1, 26);
-    let end = new Date(now.getFullYear(), now.getMonth(), 26);
+    let start = new Date(n.getFullYear(), n.getMonth()-1, 26);
+    let end = new Date(n.getFullYear(), n.getMonth(), 26);
 
-    // عرض بيانات اليوم الحالي تلقائياً عند فتح التقويم
+    // عرض بيانات اليوم الحالي تلقائياً
     const todayData = logs[todayKey];
-    document.getElementById('dayInfo').innerHTML = todayData ? 
-        `<b style="color:#00d2ff">اليوم:</b> ${todayData.in} إلى ${todayData.out} (${todayData.total} س)` : 
-        `<b style="color:#888">اليوم:</b> لا يوجد بيانات مسجلة`;
+    if(todayData) {
+        document.getElementById('dayInfo').innerHTML = `<b style="color:#00d2ff">اليوم:</b> من ${todayData.in} إلى ${todayData.out} (${todayData.total} س)`;
+    } else {
+        document.getElementById('dayInfo').innerHTML = `<b style="color:#888">اليوم:</b> لا يوجد سجل حضور`;
+    }
 
     for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
         let key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         const btn = document.createElement('div');
         
-        // تمييز اليوم الحالي بإطار منور
         let isToday = (key === todayKey);
         btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selDays.includes(key) ? 'selected' : ''}`;
         
         if (isToday) {
             btn.style.border = "2px solid #00d2ff";
-            btn.style.boxShadow = "0 0 8px #00d2ff";
-            btn.style.fontWeight = "bold";
+            btn.style.boxShadow = "0 0 10px #00d2ff";
+            btn.style.color = "#00d2ff";
         }
 
         btn.innerText = d.getDate();
         
-        // لمسة واحدة لعرض تفاصيل أي يوم
         btn.onclick = () => {
             const dLog = logs[key];
             document.getElementById('dayInfo').innerHTML = dLog ? 
@@ -261,7 +261,6 @@
                 "لا يوجد بيانات لهذا اليوم";
         };
 
-        // لمسة طويلة لتحديد الفترة (الأوبشن اللي بتحبه)
         let hold; 
         btn.onmousedown = btn.ontouchstart = () => hold = setTimeout(() => {
             if(selDays.length>=2) selDays=[]; 
@@ -272,12 +271,12 @@
             if(selDays.length==2) {
                 let b=0, e=0;
                 for(let k in logs) { 
-                    let checkDate = new Date(k);
-                    if(checkDate >= new Date(selDays[0]) && checkDate <= new Date(selDays[1])) { 
+                    let cD = new Date(k);
+                    if(cD >= new Date(selDays[0]) && cD <= new Date(selDays[1])) { 
                         b+=parseFloat(logs[k].basic); e+=parseFloat(logs[k].extra); 
                     } 
                 }
-                document.getElementById('rangeRes').innerHTML = `<div style="margin-top:10px; padding:8px; border:1px solid #00d2ff; border-radius:10px; font-size:12px">المجموع: أساسي ${b.toFixed(2)} | إضافي ${e.toFixed(2)}</div>`;
+                document.getElementById('rangeRes').innerHTML = `<div style="margin-top:10px; padding:8px; border:1px solid #00d2ff; border-radius:10px; font-size:12px">الفترة: أساسي ${b.toFixed(2)} | إضافي ${e.toFixed(2)}</div>`;
             }
         }, 800);
         
@@ -285,16 +284,10 @@
         grid.appendChild(btn);
     }
 }
-
-    function saveEmail(v) { localStorage.setItem('targetEmail', v); showToast("✅ تم الحفظ"); }
-    function closeModals() { 
-        document.querySelectorAll('.overlay').forEach(o=>o.style.display='none'); 
-        currentPIN=""; selDays=[]; 
-        if(typeof clearPass === "function") clearPass();
-    }
 </script>
 </body>
 </html>
+
 
 
 
