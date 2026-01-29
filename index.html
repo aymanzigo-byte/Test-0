@@ -167,7 +167,15 @@
     function askPIN(a) { targetAction=a; document.getElementById('pinOverlay').style.display='flex'; }
     function pressNum(n) { if(currentPIN.length<4){ currentPIN+=n; updateDots(); if(currentPIN.length==4) checkPIN(); } }
     function updateDots() { document.querySelectorAll('.p-dot').forEach((d,i)=>d.style.background=i<currentPIN.length? 'var(--primary)':'none'); }
-    function checkPIN() { if(currentPIN===appPass){ closeModals(); targetAction=='in'?startWork():stopWork(); } else { showToast("❌ PIN خطأ"); currentPIN=""; updateDots(); } }
+    function checkPIN() { 
+    if(currentPIN === appPass) { 
+        closeModals(); 
+        targetAction === 'in' ? startWork() : stopWork(); 
+    } else { 
+        showToast("❌ PIN خطأ"); 
+        currentPIN = ""; 
+        updateDots(); 
+    } 
 
     function startWork() {
         window.entryTime = new Date();
@@ -221,44 +229,37 @@
     function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCycle(); }
     function renderCycle() {
     const grid = document.getElementById('grid'); grid.innerHTML = "";
-    const n = new Date();
-    // مفتاح اليوم الحالي - تأكد من استخدام علامة الـ Backtick (حرف الذال)
-    const todayKey = `${n.getFullYear()}-${n.getMonth()+1}-${n.getDate()}`;
+    const now = new Date();
+    // العلامة دي ` هي حرف الذال
+    const todayKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
     
     const months = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-    document.getElementById('calHeader').innerText = `${months[n.getMonth()]} ${n.getFullYear()}`;
+    document.getElementById('calHeader').innerText = `${months[now.getMonth()]} ${now.getFullYear()}`;
     
-    let start = new Date(n.getFullYear(), n.getMonth()-1, 26);
-    let end = new Date(n.getFullYear(), n.getMonth(), 26);
+    let start = new Date(now.getFullYear(), now.getMonth()-1, 26);
+    let end = new Date(now.getFullYear(), now.getMonth(), 26);
 
-    // عرض بيانات اليوم الحالي تلقائياً
     const todayData = logs[todayKey];
-    if(todayData) {
-        document.getElementById('dayInfo').innerHTML = `<b style="color:#00d2ff">اليوم:</b> من ${todayData.in} إلى ${todayData.out} (${todayData.total} س)`;
-    } else {
-        document.getElementById('dayInfo').innerHTML = `<b style="color:#888">اليوم:</b> لا يوجد سجل حضور`;
-    }
+    document.getElementById('dayInfo').innerHTML = todayData ? 
+        `<b style="color:#00d2ff">اليوم:</b> ${todayData.in} - ${todayData.out} (${todayData.total} س)` : 
+        `<b style="color:#888">اليوم:</b> لا يوجد سجل`;
 
     for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
         let key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         const btn = document.createElement('div');
-        
         let isToday = (key === todayKey);
         btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selDays.includes(key) ? 'selected' : ''}`;
         
         if (isToday) {
             btn.style.border = "2px solid #00d2ff";
-            btn.style.boxShadow = "0 0 10px #00d2ff";
-            btn.style.color = "#00d2ff";
+            btn.style.boxShadow = "0 0 8px #00d2ff";
         }
 
         btn.innerText = d.getDate();
-        
         btn.onclick = () => {
             const dLog = logs[key];
             document.getElementById('dayInfo').innerHTML = dLog ? 
-                `حضور: ${dLog.in} | انصراف: ${dLog.out} | إجمالي: ${dLog.total} س` : 
-                "لا يوجد بيانات لهذا اليوم";
+                `حضور: ${dLog.in} | انصراف: ${dLog.out} | إجمالي: ${dLog.total} س` : "لا يوجد بيانات";
         };
 
         let hold; 
@@ -266,20 +267,17 @@
             if(selDays.length>=2) selDays=[]; 
             selDays.push(key); 
             selDays.sort((a,b)=>new Date(a)-new Date(b));
-            renderCycle(); 
-            
+            renderCycle();
             if(selDays.length==2) {
                 let b=0, e=0;
                 for(let k in logs) { 
-                    let cD = new Date(k);
-                    if(cD >= new Date(selDays[0]) && cD <= new Date(selDays[1])) { 
+                    if(new Date(k)>=new Date(selDays[0]) && new Date(k)<=new Date(selDays[1])) { 
                         b+=parseFloat(logs[k].basic); e+=parseFloat(logs[k].extra); 
                     } 
                 }
-                document.getElementById('rangeRes').innerHTML = `<div style="margin-top:10px; padding:8px; border:1px solid #00d2ff; border-radius:10px; font-size:12px">الفترة: أساسي ${b.toFixed(2)} | إضافي ${e.toFixed(2)}</div>`;
+                document.getElementById('rangeRes').innerHTML = `أساسي: ${b.toFixed(2)} | إضافي: ${e.toFixed(2)}`;
             }
         }, 800);
-        
         btn.onmouseup = btn.ontouchend = () => clearTimeout(hold);
         grid.appendChild(btn);
     }
@@ -287,6 +285,7 @@
 </script>
 </body>
 </html>
+
 
 
 
