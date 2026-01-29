@@ -240,18 +240,27 @@ function resumeTimer() {
 }
 
     function stopWork() {
-        clearInterval(timer);
-        const now = new Date();
-        localStorage.removeItem('isWorkingTime');
-        
-        let t = (seconds/3600).toFixed(2);
-        const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-        logs[key] = { in: window.entryTime.toLocaleTimeString(), out: now.toLocaleTimeString(), total: t };
-        localStorage.setItem('calwork_db', JSON.stringify(logs));
-        
-        showToast("✅ تم التسجيل");
-        setTimeout(() => location.reload(), 2000);
-    }
+    clearInterval(timer);
+    const now = new Date();
+    localStorage.removeItem('isWorkingTime');
+    
+    let totalHours = (seconds / 3600).toFixed(2);
+    const key = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    
+    // تسجيل البيانات محلياً في التقويم
+    logs[key] = { 
+        in: window.entryTime.toLocaleTimeString(), 
+        out: now.toLocaleTimeString(), 
+        total: totalHours 
+    };
+    localStorage.setItem('calwork_db', JSON.stringify(logs));
+    
+    // إرسال البيانات فوراً لجوجل شيت
+    sendToGoogleSheet(window.entryTime, now, totalHours);
+    
+    showToast("✅ تم التسجيل وإرسال البيانات");
+    setTimeout(() => location.reload(), 3000);
+}
 
     function showToast(m) { 
         const t = document.getElementById('toast'); t.innerText = m; 
@@ -280,7 +289,28 @@ function resumeTimer() {
             grid.appendChild(btn);
         }
     }
+        function sendToGoogleSheet(inDate, outDate, hours) {
+    const url = "https://script.google.com/macros/s/AKfycby_VSe2_iS2EX4pNjDE15Bw8cbmL6D4BTQkmsB1yl_wzUcAGcyOB2E8AUalGfjpmCpu/exec"; // ضع الرابط الخاص بك هنا
+    const data = {
+        date: inDate.toLocaleDateString(),
+        in: inDate.toLocaleTimeString(),
+        out: outDate.toLocaleTimeString(),
+        duration: hours,
+        email: document.getElementById('targetEmail').value
+    };
+
+    fetch(url, {
+        method: "POST",
+        mode: "no-cors",
+        cache: "no-cache",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(() => console.log("Data sent to Google Sheets"))
+    .catch(err => console.error("Error sending data:", err));
+}
     </script>
 </body>
 </html>
+
 
