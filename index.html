@@ -3,32 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalWork Pro | Ultimate V18</title>
+    <title>CalWork Pro | V18.2</title>
     <style>
         @font-face { font-family: 'Digital'; src: url('https://fonts.cdnfonts.com/s/14234/DS-DIGI.woff') format('woff'); }
-        :root { --primary: #00d2ff; --bg: #000; --card: #121212; --success: #2ecc71; --danger: #ff4b2b; --glow: #39FF14; --selection: rgba(0, 210, 255, 0.3); }
+        :root { --primary: #00d2ff; --bg: #000; --card: #121212; --success: #2ecc71; --danger: #ff4b2b; --glow: #39FF14; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh; }
 
         /* الشاشات */
         #splash, #activationOverlay { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
         #activationOverlay { z-index: 10000; display: none; }
         
-        /* التصميم */
         .act-box { background: var(--card); border: 1px solid var(--primary); padding: 30px; border-radius: 25px; width: 85%; text-align: center; }
         .act-input { background: #000; border: 1px solid #333; color: var(--primary); padding: 15px; border-radius: 12px; width: 100%; margin: 20px 0; text-align: center; font-size: 1.5rem; box-sizing: border-box; }
-        .act-btn { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        
+        .act-btn { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; }
+
         .settings-icon { position: absolute; top: 20px; left: 20px; font-size: 26px; color: #555; z-index: 2000; cursor: pointer; }
         .side-menu { position: fixed; top: -100%; left: 0; width: 100%; background: var(--card); transition: 0.5s; padding: 25px; z-index: 3000; border-bottom: 2px solid var(--primary); border-radius: 0 0 25px 25px; box-sizing: border-box; }
         .side-menu.active { top: 0; }
 
         /* الساعة */
-        .clock-container { position: relative; width: 210px; height: 210px; margin-top: 20px; border-radius: 50%; border: 2px solid #222; background: radial-gradient(circle, #0a0a0a 0%, #000 100%); }
+        .clock-container { position: relative; width: 200px; height: 200px; margin-top: 20px; border-radius: 50%; border: 2px solid #222; background: radial-gradient(circle, #0a0a0a 0%, #000 100%); }
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 10px; }
         .hour-hand { width: 6px; height: 45px; background: #fff; z-index: 10; }
-        .min-hand { width: 4px; height: 70px; background: var(--glow); z-index: 11; }
-        .sec-hand { width: 2px; height: 80px; background: var(--danger); z-index: 12; }
-        .clock-num { position: absolute; width: 100%; height: 100%; text-align: center; font-weight: bold; font-size: 16px; color: var(--primary); padding: 5px; box-sizing: border-box; }
+        .min-hand { width: 4px; height: 65px; background: var(--glow); z-index: 11; }
+        .sec-hand { width: 2px; height: 75px; background: var(--danger); z-index: 12; }
+        .clock-num { position: absolute; width: 100%; height: 100%; text-align: center; font-weight: bold; font-size: 15px; color: var(--primary); padding: 5px; box-sizing: border-box; }
 
         #work-timer { font-family: 'Digital', sans-serif; font-size: 4rem; color: var(--primary); margin: 15px 0; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.97); display: none; justify-content: center; align-items: center; z-index: 4000; }
@@ -36,10 +35,10 @@
         .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
         .num-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 18px; border-radius: 15px; font-size: 1.4rem; }
         
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
-        .day-btn { background: #1a1a1a; border: 1px solid #333; padding: 12px 0; border-radius: 10px; font-size: 12px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
+        .day-btn { background: #1a1a1a; border: 1px solid #333; padding: 10px 0; border-radius: 8px; font-size: 11px; }
         .day-btn.has-data { border-color: var(--success); }
-        .day-btn.selected { background: var(--selection); border-color: var(--primary); }
+        
         #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #1a1a1a; border: 1px solid var(--primary); padding: 12px 25px; border-radius: 50px; z-index: 5000; transition: 0.5s; }
         #toast.show { bottom: 30px; }
     </style>
@@ -47,174 +46,29 @@
 <body onload="initApp()">
 
     <div id="splash">
-        <div style="color:#555">BUILD V18.1</div>
-        <h1 style="color:var(--primary); font-size:2.5rem">CalWork Pro</h1>
-        <div style="color:#555">DEVELOPED BY ENG. AYMAN</div>
+        <h1 style="color:var(--primary)">CalWork Pro</h1>
+        <div style="color:#555">جاري التحميل...</div>
     </div>
 
     <div id="activationOverlay">
         <div class="act-box">
             <h2 style="color:var(--primary)">تنشيط النسخة</h2>
-            <input type="text" id="activationKeyInput" class="act-input" placeholder="0000">
-            <button class="act-btn" onclick="checkActivation()">تنشيط الآن</button>
-            <p id="actError" style="color:var(--danger); display:none; margin-top:10px">❌ كود التفعيل خطأ</p>
+            <input type="text" id="activationKeyInput" class="act-input" placeholder="كود التفعيل">
+            <button class="act-btn" onclick="checkActivation()">تنشيط</button>
+            <p id="actError" style="color:var(--danger); display:none">❌ كود خطأ</p>
         </div>
     </div>
 
     <div class="settings-icon" onclick="toggleMenu()">⚙️</div>
 
     <div id="sideMenu" class="side-menu">
-        <div onclick="openCalendar()" style="padding:15px; border-bottom:1px solid #222">📅 سجل التقويم</div>
-        <div onclick="openPassModal()" style="padding:15px; border-bottom:1px solid #222">🔒 تغيير كلمة المرور</div>
-        <input type="email" id="targetEmail" onchange="localStorage.setItem('targetEmail', this.value)" placeholder="إيميل حفظ البيانات" style="width:100%; background:#000; color:#fff; padding:10px; margin:10px 0; border:1px solid #333; text-align:center">
-        
-        <div style="border-top:1px solid #333; margin-top:10px; padding-top:10px">
-            <label style="font-size:11px; color:var(--primary)">كود تفعيل النسخ الجديدة:</label>
+        <div onclick="openCalendar()" style="padding:15px; border-bottom:1px solid #222">📅 التقويم</div>
+        <input type="email" id="targetEmail" onchange="localStorage.setItem('targetEmail', this.value)" placeholder="الإيميل" style="width:100%; background:#000; color:#fff; padding:10px; margin:10px 0; border:1px solid #333; text-align:center">
+        <div style="border-top:1px solid #333; padding-top:10px">
+            <label style="font-size:10px; color:var(--primary)">كود تفعيل النسخ الجديدة:</label>
             <input type="text" id="masterKeyInput" onchange="updateActivationKey(this.value)" style="width:100%; background:#000; color:#fff; padding:8px; border:1px dashed var(--primary); text-align:center">
         </div>
-        
         <div onclick="toggleMenu()" style="padding:15px; color:var(--danger)">✕ إغلاق</div>
     </div>
 
-    <div class="clock-container" id="analogClock">
-        <div id="hour" class="hand hour-hand"></div>
-        <div id="min" class="hand min-hand"></div>
-        <div id="sec" class="hand sec-hand"></div>
-    </div>
-
-    <div id="work-timer">00:00:00</div>
-
-    <div id="status-display" style="width:85%; opacity:0; transition:0.5s">
-        <div style="display:flex; justify-content:space-between"><span id="in-time" style="color:var(--glow)">--:--</span><span>وقت الحضور</span></div>
-        <div id="out-row" style="display:none; justify-content:space-between"><span id="out-time" style="color:var(--danger)">--:--</span><span>وقت الانصراف</span></div>
-    </div>
-
-    <div style="display:flex; gap:30px; margin-top:auto; padding-bottom:40px">
-        <button id="inBtn" style="width:90px; height:90px; border-radius:50%; background:var(--success); color:#fff; font-weight:bold" onclick="askPIN('in')">IN</button>
-        <button id="outBtn" style="width:90px; height:90px; border-radius:50%; background:var(--danger); color:#fff; font-weight:bold; opacity:0.3" onclick="askPIN('out')">OUT</button>
-    </div>
-
-    <div id="pinOverlay" class="overlay"><div class="modal-box">
-        <h3>التحقق PIN</h3>
-        <div id="pinDots" style="margin:20px 0; font-size:2rem; color:var(--primary)"></div>
-        <div class="num-pad">
-            <button class="num-btn" onclick="pressNum(1)">1</button><button class="num-btn" onclick="pressNum(2)">2</button><button class="num-btn" onclick="pressNum(3)">3</button>
-            <button class="num-btn" onclick="pressNum(4)">4</button><button class="num-btn" onclick="pressNum(5)">5</button><button class="num-btn" onclick="pressNum(6)">6</button>
-            <button class="num-btn" onclick="pressNum(7)">7</button><button class="num-btn" onclick="pressNum(8)">8</button><button class="num-btn" onclick="pressNum(9)">9</button>
-            <button class="num-btn" onclick="closeModals()">✕</button><button class="num-btn" onclick="pressNum(0)">0</button><button class="num-btn" onclick="currentPIN=''">⌫</button>
-        </div>
-    </div></div>
-
-    <div id="logOverlay" class="overlay"><div class="modal-box">
-        <h3 id="calHeader"></h3>
-        <div class="calendar-grid" id="grid"></div>
-        <div id="dayInfo" style="margin-top:15px; color:#aaa"></div>
-        <button onclick="closeModals()" style="width:100%; padding:15px; background:var(--danger); border:none; color:#fff; border-radius:15px; margin-top:15px">إغلاق</button>
-    </div></div>
-
-    <div id="toast"></div>
-
-    <script>
-    let timer, seconds=0, currentPIN="", targetAction="", appPass=localStorage.getItem('appPass')||"1234";
-    let logs=JSON.parse(localStorage.getItem('calwork_db'))||{};
-    let masterKey = localStorage.getItem('masterActivationKey') || "2026";
-
-    function initApp() {
-        if (!localStorage.getItem('isActivated')) {
-            document.getElementById('splash').style.display = 'none';
-            document.getElementById('activationOverlay').style.display = 'flex';
-            return;
-        }
-
-        createClockNumbers();
-        setInterval(updateClock, 1000);
-        document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
-        document.getElementById('masterKeyInput').value = masterKey;
-
-        // استعادة العداد إذا كان شغال
-        const savedTime = localStorage.getItem('isWorkingTime');
-        if (savedTime) {
-            window.entryTime = new Date(savedTime);
-            seconds = Math.floor((new Date() - window.entryTime) / 1000);
-            startTimerLogic();
-        }
-
-        setTimeout(() => { document.getElementById('splash').style.display='none'; }, 2000);
-    }
-
-    function createClockNumbers() {
-        const c = document.getElementById('analogClock');
-        for(let i=1; i<=12; i++) {
-            let d = document.createElement('div');
-            d.className = 'clock-num'; d.innerText = i;
-            d.style.transform = `rotate(${i*30}deg)`;
-            c.appendChild(d);
-        }
-    }
-
-    function updateClock() {
-        const n = new Date();
-        const h=n.getHours()%12, m=n.getMinutes(), s=n.getSeconds();
-        document.getElementById('hour').style.transform=`translateX(-50%) rotate(${h*30+m*0.5}deg)`;
-        document.getElementById('min').style.transform=`translateX(-50%) rotate(${m*6}deg)`;
-        document.getElementById('sec').style.transform=`translateX(-50%) rotate(${s*6}deg)`;
-    }
-
-    function checkActivation() {
-        if (document.getElementById('activationKeyInput').value === masterKey) {
-            localStorage.setItem('isActivated', 'true');
-            location.reload();
-        } else {
-            document.getElementById('actError').style.display = 'block';
-        }
-    }
-
-    function updateActivationKey(v) {
-        localStorage.setItem('masterActivationKey', v);
-        masterKey = v;
-        showToast("✅ تم تغيير الكود لـ " + v);
-    }
-
-    function askPIN(a) { targetAction=a; document.getElementById('pinOverlay').style.display='flex'; }
-    function pressNum(n) { 
-        if(currentPIN.length<4) {
-            currentPIN += n;
-            document.getElementById('pinDots').innerText = "*".repeat(currentPIN.length);
-            if(currentPIN.length===4) {
-                if(currentPIN === appPass) {
-                    closeModals();
-                    targetAction === 'in' ? startWork() : stopWork();
-                } else {
-                    showToast("❌ PIN خطأ");
-                    currentPIN = ""; document.getElementById('pinDots').innerText = "";
-                }
-            }
-        }
-    }
-
-    function startWork() {
-        if (localStorage.getItem('isWorkingTime')) return;
-        window.entryTime = new Date();
-        localStorage.setItem('isWorkingTime', window.entryTime);
-        startTimerLogic();
-    }
-
-    function startTimerLogic() {
-        document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        document.getElementById('status-display').style.opacity='1';
-        document.getElementById('inBtn').style.opacity='0.3'; document.getElementById('outBtn').style.opacity='1';
-        timer = setInterval(() => {
-            seconds++;
-            let h=Math.floor(seconds/3600).toString().padStart(2,'0'),
-                m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'),
-                s=(seconds%60).toString().padStart(2,'0');
-            document.getElementById('work-timer').innerText = `${h}:${m}:${s}`;
-        }, 1000);
-    }
-
-    function stopWork() {
-        clearInterval(timer);
-        const now = new Date();
-        localStorage.removeItem('isWorkingTime');
-        document.getElementById('out-time').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        document.getElementById('out-row').style.display='flex';
+    <div class="clock-container" id="
