@@ -134,11 +134,27 @@
     let pStep=1, t1="", t2="", t3="", selDays=[];
 
     function initApp() {
-        createClockNumbers();
-        setInterval(updateClock, 1000);
-        document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
-        setTimeout(() => { document.getElementById('splash').style.display='none'; }, 2500);
+    createClockNumbers();
+    setInterval(updateClock, 1000);
+    document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
+    
+    // فحص لو كان فيه حضور شغال قبل ما البرنامج يقفل
+    const savedInTime = localStorage.getItem('isWorkingTime');
+    if (savedInTime) {
+        window.entryTime = new Date(savedInTime);
+        const now = new Date();
+        seconds = Math.floor((now - window.entryTime) / 1000);
+        
+        document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('status-display').style.opacity='1';
+        document.getElementById('inBtn').style.opacity='0.3'; 
+        document.getElementById('outBtn').style.opacity='1';
+        
+        timer = setInterval(updateWorkTimer, 1000);
     }
+
+    setTimeout(() => { document.getElementById('splash').style.display='none'; }, 2500);
+}
 
     function createClockNumbers() {
         const container = document.getElementById('analogClock');
@@ -178,18 +194,27 @@
     }
 
     function startWork() {
-        window.entryTime = new Date();
-        document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        document.getElementById('status-display').style.opacity='1';
-        document.getElementById('inBtn').style.opacity='0.3'; document.getElementById('outBtn').style.opacity='1';
-        timer = setInterval(() => { 
-            seconds++; 
-            let h=Math.floor(seconds/3600).toString().padStart(2,'0'), 
-                m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'), 
-                s=(seconds%60).toString().padStart(2,'0'); 
-            document.getElementById('work-timer').innerText=`${h}:${m}:${s}`; 
-        }, 1000);
-    }
+    window.entryTime = new Date();
+    // حفظ وقت الحضور في ذاكرة المتصفح الدائمة
+    localStorage.setItem('isWorkingTime', window.entryTime);
+    
+    document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('status-display').style.opacity='1';
+    document.getElementById('inBtn').style.opacity='0.3'; 
+    document.getElementById('outBtn').style.opacity='1';
+    
+    seconds = 0;
+    timer = setInterval(updateWorkTimer, 1000);
+}
+
+// وظيفة مساعدة لتحديث العداد
+function updateWorkTimer() {
+    seconds++; 
+    let h=Math.floor(seconds/3600).toString().padStart(2,'0'), 
+        m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'), 
+        s=(seconds%60).toString().padStart(2,'0'); 
+    document.getElementById('work-timer').innerText=`${h}:${m}:${s}`;
+}
 
     function stopWork() {
         clearInterval(timer); const now = new Date();
@@ -296,6 +321,7 @@
     </script>
 </body>
 </html>
+
 
 
 
