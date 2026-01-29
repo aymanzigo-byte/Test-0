@@ -11,6 +11,15 @@
 
         /* 1. شاشة البداية */
         #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        <div id="activationOverlay">
+    <div class="act-box">
+        <h2 style="color:var(--primary); margin:0">تنشيط النسخة</h2>
+        <p style="color:#666; font-size: 13px; margin-top: 10px;">برجاء إدخال كود التفعيل الخاص بك للاستمرار</p>
+        <input type="text" id="activationKeyInput" class="act-input" placeholder="0000">
+        <button class="act-btn" onclick="checkActivation()">تنشيط الآن</button>
+        <p id="actError" style="color:var(--danger); margin-top:15px; display:none; font-size:12px">❌ كود التنشيط غير صحيح</p>
+    </div>
+</div>
         #splash h1 { color: var(--primary); font-size: 2.5rem; text-shadow: 0 0 20px var(--primary); margin: 10px 0; }
         #splash .dev { color: #555; font-size: 0.9rem; letter-spacing: 2px; }
 
@@ -50,6 +59,11 @@
 .pass-line.active { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,210,255,0.2); }
 .stars { color: var(--primary); font-size: 1.4rem; letter-spacing: 5px; font-weight: bold; min-height: 24px; }
 .pass-label { color: #888; font-size: 0.8rem; text-transform: uppercase; }
+        /* تصميم شاشة القفل */
+#activationOverlay { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
+.act-box { background: var(--card); border: 1px solid var(--primary); padding: 30px; border-radius: 25px; width: 85%; text-align: center; box-shadow: 0 0 20px rgba(0,210,255,0.2); }
+.act-input { background: #000; border: 1px solid #333; color: var(--primary); padding: 15px; border-radius: 12px; width: 100%; margin: 20px 0; text-align: center; font-size: 1.5rem; letter-spacing: 5px; box-sizing: border-box; }
+.act-btn { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     </style>
 </head>
 <body onload="initApp()">
@@ -139,28 +153,45 @@
     let pStep=1, t1="", t2="", t3="", selDays=[];
 
     function initApp() {
+    // 1. التأكد من التفعيل أولاً
+    if (!localStorage.getItem('isActivated')) {
+        document.getElementById('splash').style.display = 'none';
+        document.getElementById('activationOverlay').style.display = 'flex';
+        return; // بيوقف تشغيل باقي البرنامج لو مش متفعل
+    }
+
+    // 2. كود التشغيل الطبيعي (الساعة والذاكرة)
     createClockNumbers();
     setInterval(updateClock, 1000);
     document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
-    
-    // فحص لو كان فيه حضور شغال قبل ما البرنامج يقفل
+    document.getElementById('masterKeyInput').value = currentActivationKey;
+
     const savedInTime = localStorage.getItem('isWorkingTime');
     if (savedInTime) {
         window.entryTime = new Date(savedInTime);
         const now = new Date();
         seconds = Math.floor((now - window.entryTime) / 1000);
-        
         document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         document.getElementById('status-display').style.opacity='1';
-        document.getElementById('inBtn').style.opacity='0.3'; 
-        document.getElementById('outBtn').style.opacity='1';
-        
+        document.getElementById('inBtn').style.opacity='0.3'; document.getElementById('outBtn').style.opacity='1';
         timer = setInterval(updateWorkTimer, 1000);
     }
-
     setTimeout(() => { document.getElementById('splash').style.display='none'; }, 2500);
 }
 
+// وظيفة التأكد من كود التفعيل
+function checkActivation() {
+    const userInput = document.getElementById('activationKeyInput').value;
+    // بيقارن اللي المستخدم كتبه بالكود اللي إنت حددته في الـ masterActivationKey
+    if (userInput === currentActivationKey) {
+        localStorage.setItem('isActivated', 'true');
+        showToast("✅ تم التنشيط بنجاح");
+        location.reload(); // بيعيد التحميل عشان يفتح البرنامج
+    } else {
+        document.getElementById('actError').style.display = 'block';
+        setTimeout(() => { document.getElementById('actError').style.display = 'none'; }, 3000);
+    }
+}
     function createClockNumbers() {
         const container = document.getElementById('analogClock');
         for(let i=1; i<=12; i++) {
@@ -337,6 +368,7 @@ function updateActivationKey(newKey) {
     </script>
 </body>
 </html>
+
 
 
 
