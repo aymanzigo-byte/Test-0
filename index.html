@@ -71,4 +71,186 @@
         <div onclick="toggleMenu()" style="padding:15px; color:var(--danger)">✕ إغلاق</div>
     </div>
 
-    <div class="clock-container" id="
+    <div class="clock-container" id="analogClock">
+        <div id="hour" class="hand hour-hand"></div>
+        <div id="min" class="hand min-hand"></div>
+        <div id="sec" class="hand sec-hand"></div>
+    </div>
+
+    <div id="work-timer">00:00:00</div>
+
+    <div id="status-display" style="width:85%; opacity:0;">
+        <div style="display:flex; justify-content:space-between"><span id="in-time" style="color:var(--glow)">--:--</span><span>الحضور</span></div>
+        <div id="out-row" style="display:none; justify-content:space-between"><span id="out-time" style="color:var(--danger)">--:--</span><span>الانصراف</span></div>
+    </div>
+
+    <div style="display:flex; gap:30px; margin-top:auto; padding-bottom:40px">
+        <button id="inBtn" style="width:80px; height:80px; border-radius:50%; background:var(--success); color:#fff;" onclick="askPIN('in')">IN</button>
+        <button id="outBtn" style="width:80px; height:80px; border-radius:50%; background:var(--danger); color:#fff; opacity:0.3" onclick="askPIN('out')">OUT</button>
+    </div>
+
+    <div id="pinOverlay" class="overlay"><div class="modal-box">
+        <h3>PIN</h3>
+        <div id="pinDots" style="font-size:2rem; color:var(--primary); margin:10px;"></div>
+        <div class="num-pad">
+            <button class="num-btn" onclick="pressNum(1)">1</button><button class="num-btn" onclick="pressNum(2)">2</button><button class="num-btn" onclick="pressNum(3)">3</button>
+            <button class="num-btn" onclick="pressNum(4)">4</button><button class="num-btn" onclick="pressNum(5)">5</button><button class="num-btn" onclick="pressNum(6)">6</button>
+            <button class="num-btn" onclick="pressNum(7)">7</button><button class="num-btn" onclick="pressNum(8)">8</button><button class="num-btn" onclick="pressNum(9)">9</button>
+            <button class="num-btn" onclick="closeModals()">✕</button><button class="num-btn" onclick="pressNum(0)">0</button><button class="num-btn" onclick="currentPIN=''">⌫</button>
+        </div>
+    </div></div>
+
+    <div id="logOverlay" class="overlay"><div class="modal-box">
+        <h3 id="calHeader"></h3>
+        <div class="calendar-grid" id="grid"></div>
+        <div id="dayInfo" style="margin-top:10px; color:#aaa"></div>
+        <button onclick="closeModals()" style="width:100%; padding:10px; background:var(--danger); border:none; color:#fff; border-radius:10px; margin-top:10px">إغلاق</button>
+    </div></div>
+
+    <div id="toast"></div>
+
+    <script>
+    let timer, seconds=0, currentPIN="", targetAction="", appPass=localStorage.getItem('appPass')||"1234";
+    let logs=JSON.parse(localStorage.getItem('calwork_db'))||{};
+    let masterKey = localStorage.getItem('masterActivationKey') || "2026";
+
+    function initApp() {
+        createClockNumbers();
+        setInterval(updateClock, 1000);
+
+        if (!localStorage.getItem('isActivated')) {
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('activationOverlay').style.display = 'flex';
+            return;
+        }
+
+        document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
+        document.getElementById('masterKeyInput').value = masterKey;
+
+        const savedTime = localStorage.getItem('isWorkingTime');
+        if (savedTime) {
+            window.entryTime = new Date(savedTime);
+            seconds = Math.floor((new Date() - window.entryTime) / 1000);
+            resumeTimer();
+        }
+
+        setTimeout(() => { document.getElementById('splash').style.display='none'; }, 1500);
+    }
+
+    function createClockNumbers() {
+        const c = document.getElementById('analogClock');
+        for(let i=1; i<=12; i++) {
+            let d = document.createElement('div');
+            d.className = 'clock-num'; d.innerText = i;
+            d.style.transform = `rotate(${i*30}deg)`;
+            c.appendChild(d);
+        }
+    }
+
+    function updateClock() {
+        const n = new Date();
+        const h=n.getHours()%12, m=n.getMinutes(), s=n.getSeconds();
+        document.getElementById('hour').style.transform=`translateX(-50%) rotate(${h*30+m*0.5}deg)`;
+        document.getElementById('min').style.transform=`translateX(-50%) rotate(${m*6}deg)`;
+        document.getElementById('sec').style.transform=`translateX(-50%) rotate(${s*6}deg)`;
+    }
+
+    function checkActivation() {
+        if (document.getElementById('activationKeyInput').value === masterKey) {
+            localStorage.setItem('isActivated', 'true');
+            location.reload();
+        } else {
+            document.getElementById('actError').style.display = 'block';
+        }
+    }
+
+    function updateActivationKey(v) {
+        localStorage.setItem('masterActivationKey', v);
+        masterKey = v;
+        showToast("✅ كود التنشيط الجديد: " + v);
+    }
+
+    function askPIN(a) { targetAction=a; document.getElementById('pinOverlay').style.display='flex'; }
+    
+    function pressNum(n) { 
+        if(currentPIN.length < 4) {
+            currentPIN += n;
+            document.getElementById('pinDots').innerText = "*".repeat(currentPIN.length);
+            if(currentPIN.length === 4) {
+                if(currentPIN === appPass) {
+                    closeModals();
+                    targetAction === 'in' ? startWork() : stopWork();
+                } else {
+                    showToast("❌ PIN خطأ");
+                    currentPIN = ""; document.getElementById('pinDots').innerText = "";
+                }
+            }
+        }
+    }
+
+    function startWork() {
+        window.entryTime = new Date();
+        localStorage.setItem('isWorkingTime', window.entryTime);
+        resumeTimer();
+    }
+
+    function resumeTimer() {
+        document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('status-display').style.opacity='1';
+        document.getElementById('inBtn').style.opacity='0.3'; document.getElementById('outBtn').style.opacity='1';
+        if(timer) clearInterval(timer);
+        timer = setInterval(updateTimerDisplay, 1000);
+    }
+
+    function updateTimerDisplay() {
+        seconds++;
+        let h=Math.floor(seconds/3600).toString().padStart(2,'0'),
+            m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'),
+            s=(seconds%60).toString().padStart(2,'0');
+        document.getElementById('work-timer').innerText = `${h}:${m}:${s}`;
+    }
+
+    function stopWork() {
+        clearInterval(timer);
+        const now = new Date();
+        localStorage.removeItem('isWorkingTime');
+        
+        let t = (seconds/3600).toFixed(2);
+        const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+        logs[key] = { in: window.entryTime.toLocaleTimeString(), out: now.toLocaleTimeString(), total: t };
+        localStorage.setItem('calwork_db', JSON.stringify(logs));
+        
+        showToast("✅ تم التسجيل");
+        setTimeout(() => location.reload(), 2000);
+    }
+
+    function showToast(m) { 
+        const t = document.getElementById('toast'); t.innerText = m; 
+        t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); 
+    }
+    function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
+    function closeModals() { document.querySelectorAll('.overlay').forEach(o=>o.style.display='none'); currentPIN=""; document.getElementById('pinDots').innerText=""; }
+    function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCycle(); }
+
+    function renderCycle() {
+        const grid = document.getElementById('grid'); grid.innerHTML = "";
+        const now = new Date();
+        document.getElementById('calHeader').innerText = `سجل ${now.getMonth()+1} / ${now.getFullYear()}`;
+        let start = new Date(now.getFullYear(), now.getMonth(), 1);
+        for(let i=0; i<31; i++) {
+            let d = new Date(start); d.setDate(i+1);
+            if(d.getMonth() !== now.getMonth()) break;
+            const btn = document.createElement('div');
+            btn.className = 'day-btn';
+            btn.innerText = d.getDate();
+            const log = logs[`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`];
+            if(log) btn.classList.add('has-data');
+            btn.onclick = () => {
+                document.getElementById('dayInfo').innerText = log ? `حضور: ${log.in} | انصراف: ${log.out} | سعات: ${log.total}` : "لا يوجد بيانات";
+            };
+            grid.appendChild(btn);
+        }
+    }
+    </script>
+</body>
+</html>
