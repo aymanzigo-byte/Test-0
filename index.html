@@ -66,6 +66,11 @@
         <div onclick="openCalendar()" style="padding:15px; border-bottom:1px solid #222">📅 سجل التقويم (دورة 26)</div>
         <div onclick="openPassModal()" style="padding:15px; border-bottom:1px solid #222">🔒 تغيير كلمة المرور</div>
         <input type="email" id="targetEmail" onchange="saveEmail(this.value)" placeholder="إيميل حفظ البيانات" style="width:100%; background:#000; color:#fff; padding:10px; margin:10px 0; border-radius:8px; border:1px solid #333; text-align:center">
+        <div style="border-top:1px solid #333; margin-top:10px; padding-top:10px; padding: 0 15px;">
+    <label style="font-size:11px; color:var(--primary); display:block; margin-bottom:5px; text-align:right;">كود تفعيل النسخ الجديدة:</label>
+    <input type="text" id="masterKeyInput" onchange="updateActivationKey(this.value)" placeholder="اكتب الكود الجديد هنا" 
+    style="width:100%; background:#000; color:#fff; padding:10px; border-radius:8px; border:1px dashed var(--primary); text-align:center; box-sizing: border-box;">
+</div>
         <div onclick="toggleMenu()" style="padding:15px; color:var(--danger)">✕ إغلاق القائمة</div>
     </div>
 
@@ -317,10 +322,22 @@ function updateWorkTimer() {
         document.querySelectorAll('.overlay').forEach(o=>o.style.display='none'); 
         currentPIN=""; selDays=[]; 
         if(typeof clearPass === "function") clearPass();
+        // 1. تعريف الكود في الذاكرة (الافتراضي 2026)
+let currentActivationKey = localStorage.getItem('masterActivationKey') || "2026";
+
+// 2. وظيفة حفظ الكود الجديد لما تكتبه
+function updateActivationKey(newKey) {
+    if(newKey.trim() !== "") {
+        localStorage.setItem('masterActivationKey', newKey);
+        currentActivationKey = newKey;
+        showToast("⚠️ تم اعتماد " + newKey + " ككود تفعيل جديد");
+    }
+}
     }
     </script>
 </body>
 </html>
+
 
 
 
