@@ -137,7 +137,6 @@
         createClockNumbers();
         setInterval(updateClock, 1000);
         document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
-        // ده السطر المسؤول عن إخفاء شاشة البداية بعد ثانيتين ونصف
         setTimeout(() => { document.getElementById('splash').style.display='none'; }, 2500);
     }
 
@@ -161,28 +160,35 @@
     }
 
     function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-
     function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
-
     function askPIN(a) { targetAction=a; document.getElementById('pinOverlay').style.display='flex'; }
     function pressNum(n) { if(currentPIN.length<4){ currentPIN+=n; updateDots(); if(currentPIN.length==4) checkPIN(); } }
     function updateDots() { document.querySelectorAll('.p-dot').forEach((d,i)=>d.style.background=i<currentPIN.length? 'var(--primary)':'none'); }
+
+    // هنا كان الخطأ وتم الإصلاح بإضافة الأقواس }
     function checkPIN() { 
-    if(currentPIN === appPass) { 
-        closeModals(); 
-        targetAction === 'in' ? startWork() : stopWork(); 
-    } else { 
-        showToast("❌ PIN خطأ"); 
-        currentPIN = ""; 
-        updateDots(); 
-    } 
+        if(currentPIN === appPass) { 
+            closeModals(); 
+            targetAction === 'in' ? startWork() : stopWork(); 
+        } else { 
+            showToast("❌ PIN خطأ"); 
+            currentPIN = ""; 
+            updateDots(); 
+        }
+    }
 
     function startWork() {
         window.entryTime = new Date();
         document.getElementById('in-time').innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         document.getElementById('status-display').style.opacity='1';
         document.getElementById('inBtn').style.opacity='0.3'; document.getElementById('outBtn').style.opacity='1';
-        timer = setInterval(() => { seconds++; let h=Math.floor(seconds/3600).toString().padStart(2,'0'), m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'), s=(seconds%60).toString().padStart(2,'0'); document.getElementById('work-timer').innerText=`${h}:${m}:${s}`; }, 1000);
+        timer = setInterval(() => { 
+            seconds++; 
+            let h=Math.floor(seconds/3600).toString().padStart(2,'0'), 
+                m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'), 
+                s=(seconds%60).toString().padStart(2,'0'); 
+            document.getElementById('work-timer').innerText=`${h}:${m}:${s}`; 
+        }, 1000);
     }
 
     function stopWork() {
@@ -198,7 +204,6 @@
         setTimeout(() => { document.getElementById('status-display').style.opacity='0'; document.getElementById('work-timer').innerText="00:00:00"; document.getElementById('inBtn').style.opacity='1'; document.getElementById('outBtn').style.opacity='0.3'; seconds=0; }, 10000);
     }
 
-    // وظائف تغيير الباسورد الاحترافية
     function openPassModal() { toggleMenu(); document.getElementById('passOverlay').style.display='flex'; pStep=1; clearPass(); }
     function pNum(n) {
         if(pStep==1 && t1.length<4) t1+=n;
@@ -227,64 +232,71 @@
     function closePass() { document.getElementById('passOverlay').style.display='none'; }
 
     function openCalendar() { toggleMenu(); document.getElementById('logOverlay').style.display='flex'; renderCycle(); }
+    
     function renderCycle() {
-    const grid = document.getElementById('grid'); grid.innerHTML = "";
-    const now = new Date();
-    // العلامة دي ` هي حرف الذال
-    const todayKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-    
-    const months = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-    document.getElementById('calHeader').innerText = `${months[now.getMonth()]} ${now.getFullYear()}`;
-    
-    let start = new Date(now.getFullYear(), now.getMonth()-1, 26);
-    let end = new Date(now.getFullYear(), now.getMonth(), 26);
-
-    const todayData = logs[todayKey];
-    document.getElementById('dayInfo').innerHTML = todayData ? 
-        `<b style="color:#00d2ff">اليوم:</b> ${todayData.in} - ${todayData.out} (${todayData.total} س)` : 
-        `<b style="color:#888">اليوم:</b> لا يوجد سجل`;
-
-    for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
-        let key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        const btn = document.createElement('div');
-        let isToday = (key === todayKey);
-        btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selDays.includes(key) ? 'selected' : ''}`;
+        const grid = document.getElementById('grid'); grid.innerHTML = "";
+        const now = new Date();
+        const todayKey = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+        const months = ["يناير", "فبراير", "مارس", "إبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+        document.getElementById('calHeader').innerText = `${months[now.getMonth()]} ${now.getFullYear()}`;
         
-        if (isToday) {
-            btn.style.border = "2px solid #00d2ff";
-            btn.style.boxShadow = "0 0 8px #00d2ff";
-        }
+        let start = new Date(now.getFullYear(), now.getMonth()-1, 26);
+        let end = new Date(now.getFullYear(), now.getMonth(), 26);
 
-        btn.innerText = d.getDate();
-        btn.onclick = () => {
-            const dLog = logs[key];
-            document.getElementById('dayInfo').innerHTML = dLog ? 
-                `حضور: ${dLog.in} | انصراف: ${dLog.out} | إجمالي: ${dLog.total} س` : "لا يوجد بيانات";
-        };
+        const todayData = logs[todayKey];
+        document.getElementById('dayInfo').innerHTML = todayData ? 
+            `<b style="color:#00d2ff">اليوم:</b> ${todayData.in} - ${todayData.out} (${todayData.total} س)` : 
+            `<b style="color:#888">اليوم:</b> لا يوجد سجل`;
 
-        let hold; 
-        btn.onmousedown = btn.ontouchstart = () => hold = setTimeout(() => {
-            if(selDays.length>=2) selDays=[]; 
-            selDays.push(key); 
-            selDays.sort((a,b)=>new Date(a)-new Date(b));
-            renderCycle();
-            if(selDays.length==2) {
-                let b=0, e=0;
-                for(let k in logs) { 
-                    if(new Date(k)>=new Date(selDays[0]) && new Date(k)<=new Date(selDays[1])) { 
-                        b+=parseFloat(logs[k].basic); e+=parseFloat(logs[k].extra); 
-                    } 
-                }
-                document.getElementById('rangeRes').innerHTML = `أساسي: ${b.toFixed(2)} | إضافي: ${e.toFixed(2)}`;
+        for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+            let key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+            const btn = document.createElement('div');
+            let isToday = (key === todayKey);
+            btn.className = `day-btn ${logs[key] ? 'has-data' : ''} ${selDays.includes(key) ? 'selected' : ''}`;
+            
+            if (isToday) {
+                btn.style.border = "2px solid #00d2ff";
+                btn.style.boxShadow = "0 0 8px #00d2ff";
             }
-        }, 800);
-        btn.onmouseup = btn.ontouchend = () => clearTimeout(hold);
-        grid.appendChild(btn);
+
+            btn.innerText = d.getDate();
+            btn.onclick = () => {
+                const dLog = logs[key];
+                document.getElementById('dayInfo').innerHTML = dLog ? 
+                    `حضور: ${dLog.in} | انصراف: ${dLog.out} | إجمالي: ${dLog.total} س` : "لا يوجد بيانات";
+            };
+
+            let hold; 
+            btn.onmousedown = btn.ontouchstart = () => hold = setTimeout(() => {
+                if(selDays.length>=2) selDays=[]; 
+                selDays.push(key); 
+                selDays.sort((a,b)=>new Date(a)-new Date(b));
+                renderCycle();
+                if(selDays.length==2) {
+                    let b=0, e=0;
+                    for(let k in logs) { 
+                        if(new Date(k)>=new Date(selDays[0]) && new Date(k)<=new Date(selDays[1])) { 
+                            b+=parseFloat(logs[k].basic); e+=parseFloat(logs[k].extra); 
+                        } 
+                    }
+                    document.getElementById('rangeRes').innerHTML = `أساسي: ${b.toFixed(2)} | إضافي: ${e.toFixed(2)}`;
+                }
+            }, 800);
+            btn.onmouseup = btn.ontouchend = () => clearTimeout(hold);
+            grid.appendChild(btn);
+        }
     }
-}
-</script>
+
+    function saveEmail(v) { localStorage.setItem('targetEmail', v); showToast("✅ تم الحفظ"); }
+    function closeModals() { 
+        document.querySelectorAll('.overlay').forEach(o=>o.style.display='none'); 
+        currentPIN=""; selDays=[]; 
+        if(typeof clearPass === "function") clearPass();
+    }
+    </script>
 </body>
 </html>
+
 
 
 
