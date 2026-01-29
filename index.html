@@ -115,27 +115,43 @@
     let masterKey = localStorage.getItem('masterActivationKey') || "2026";
 
     function initApp() {
+    try {
+        // 1. تشغيل الساعة فوراً (عشان العقارب متقفش)
         createClockNumbers();
         setInterval(updateClock, 1000);
 
+        // 2. فحص التفعيل
         if (!localStorage.getItem('isActivated')) {
             document.getElementById('splash').style.display = 'none';
             document.getElementById('activationOverlay').style.display = 'flex';
-            return;
+            return; 
         }
 
+        // 3. استعادة البيانات من الذاكرة
         document.getElementById('targetEmail').value = localStorage.getItem('targetEmail') || "";
-        document.getElementById('masterKeyInput').value = masterKey;
+        if(document.getElementById('masterKeyInput')) {
+            document.getElementById('masterKeyInput').value = masterKey;
+        }
 
+        // 4. فحص لو فيه عداد شغال
         const savedTime = localStorage.getItem('isWorkingTime');
         if (savedTime) {
             window.entryTime = new Date(savedTime);
+            // حساب الفرق بالثواني بين دلوقتي وبين وقت الحضور
             seconds = Math.floor((new Date() - window.entryTime) / 1000);
             resumeTimer();
         }
 
-        setTimeout(() => { document.getElementById('splash').style.display='none'; }, 1500);
+    } catch (e) {
+        console.log("Error in init:", e);
+    } finally {
+        // 5. أهم سطر: إخفاء شاشة البداية بعد ثانية ونصف مهما حصل
+        setTimeout(() => { 
+            const splash = document.getElementById('splash');
+            if(splash) splash.style.display = 'none'; 
+        }, 1500);
     }
+}
 
     function createClockNumbers() {
         const c = document.getElementById('analogClock');
@@ -203,12 +219,25 @@
     }
 
     function updateTimerDisplay() {
-        seconds++;
-        let h=Math.floor(seconds/3600).toString().padStart(2,'0'),
-            m=Math.floor((seconds%3600)/60).toString().padStart(2,'0'),
-            s=(seconds%60).toString().padStart(2,'0');
-        document.getElementById('work-timer').innerText = `${h}:${m}:${s}`;
-    }
+    seconds++;
+    let h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    let m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    let s = (seconds % 60).toString().padStart(2, '0');
+    const timerElem = document.getElementById('work-timer');
+    if(timerElem) timerElem.innerText = `${h}:${m}:${s}`;
+}
+
+function resumeTimer() {
+    const inTimeElem = document.getElementById('in-time');
+    if(inTimeElem) inTimeElem.innerText = window.entryTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    
+    document.getElementById('status-display').style.opacity = '1';
+    document.getElementById('inBtn').style.opacity = '0.3'; 
+    document.getElementById('outBtn').style.opacity = '1';
+    
+    if(timer) clearInterval(timer);
+    timer = setInterval(updateTimerDisplay, 1000);
+}
 
     function stopWork() {
         clearInterval(timer);
@@ -254,3 +283,4 @@
     </script>
 </body>
 </html>
+
